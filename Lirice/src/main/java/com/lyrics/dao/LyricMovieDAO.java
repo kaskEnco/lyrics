@@ -20,7 +20,7 @@ public class LyricMovieDAO extends BaseDAO{
 			ptmt = connection.prepareStatement(queryString);
 			resultSet = ptmt.executeQuery();
 			while(resultSet.next()) {
-				movie.setId(resultSet.getInt("id"));
+				movie.setMovieId(resultSet.getInt("id"));
 				movie.setLanguage(langDAO.findById(resultSet.getInt("lang_id")));
 				movie.setYear(yearDAO.findById(resultSet.getInt("movie_year_id")));
 				movie.setMovieName(resultSet.getString("movie_name"));
@@ -47,7 +47,7 @@ public class LyricMovieDAO extends BaseDAO{
 			ptmt.setInt(1, id);
 			resultSet = ptmt.executeQuery();
 			while(resultSet.next()) {
-				movie.setId(resultSet.getInt("id"));
+				movie.setMovieId(resultSet.getInt("id"));
 				movie.setLanguage(langDAO.findById(resultSet.getInt("lang_id")));
 				movie.setYear(yearDAO.findById(resultSet.getInt("movie_year_id")));
 				movie.setMovieName(resultSet.getString("movie_name"));
@@ -66,7 +66,6 @@ public class LyricMovieDAO extends BaseDAO{
 	public List<MoviesLatest> findLatest(){
 		MoviesLatest latest;
 		List<MoviesLatest> moviesLatest = new ArrayList<MoviesLatest>();
-		LyricContentDAO lyricsDAO;
 		String queryString = "SELECT * FROM lyrics.l_movie ORDER BY movie_release_date DESC LIMIT 15";
 		try {
 			connection = getConnection();
@@ -74,12 +73,10 @@ public class LyricMovieDAO extends BaseDAO{
 			resultSet = ptmt.executeQuery();
 			while(resultSet.next()){
 				latest = new MoviesLatest();
-				lyricsDAO = new LyricContentDAO();
 				int movieId = resultSet.getInt("id");
-				latest.setId(movieId);
+				latest.setMovieId(movieId);
 				latest.setMovieName(resultSet.getString("movie_name"));
 				latest.setMovieReleaseDate(resultSet.getTimestamp("movie_release_date"));
-				latest.setLyricsForMovie(lyricsDAO.getLyricsByMovie(movieId));
 				moviesLatest.add(latest);
 			}
 		} catch (SQLException e) {

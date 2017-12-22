@@ -4,7 +4,7 @@ import java.sql.Timestamp;
 
 public class L_lyrics {
 
-	private int id;
+	private int lyricId;
 	private String lyricTitle;
 	private String lyricContent;
 	private L_movie movie;
@@ -13,12 +13,14 @@ public class L_lyrics {
 	private Timestamp creationDate;
 	private Timestamp updationDate;
 
-	public int getId() {
-		return id;
+	
+
+	public int getLyricId() {
+		return lyricId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setLyricId(int lyricId) {
+		this.lyricId = lyricId;
 	}
 
 	public String getLyricTitle() {

@@ -5,17 +5,19 @@ import java.util.List;
 
 public class MoviesLatest {
 
-	private int id;
+	private int movieId;
 	private String movieName;
 	private Timestamp movieReleaseDate;
-	private List<L_lyrics> lyricsForMovie;
+	
 
-	public int getId() {
-		return id;
+	
+
+	public int getMovieId() {
+		return movieId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setMovieId(int movieId) {
+		this.movieId = movieId;
 	}
 
 	public String getMovieName() {
@@ -34,11 +36,5 @@ public class MoviesLatest {
 		this.movieReleaseDate = movieReleaseDate;
 	}
 
-	public List<L_lyrics> getLyricsForMovie() {
-		return lyricsForMovie;
-	}
-
-	public void setLyricsForMovie(List<L_lyrics> lyricsForMovie) {
-		this.lyricsForMovie = lyricsForMovie;
-	}
+	
 }

@@ -4,13 +4,14 @@ import java.sql.Timestamp;
 
 public class L_movie {
 
-	private int id;
+	private int movieId;
 	private L_year year;
-	public int getId() {
-		return id;
+	
+	public int getMovieId() {
+		return movieId;
 	}
-	public void setId(int id) {
-		this.id = id;
+	public void setMovieId(int movieId) {
+		this.movieId = movieId;
 	}
 	public L_year getYear() {
 		return year;

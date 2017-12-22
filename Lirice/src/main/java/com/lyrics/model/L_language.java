@@ -2,15 +2,17 @@ package com.lyrics.model;
 
 public class L_language {
 
-	private int id;
+	private int langId;
 	private String language;
 
-	public int getId() {
-		return id;
+	
+
+	public int getLangId() {
+		return langId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setLangId(int langId) {
+		this.langId = langId;
 	}
 
 	public String getLanguage() {

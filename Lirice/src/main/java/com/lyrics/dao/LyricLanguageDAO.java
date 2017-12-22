@@ -16,7 +16,7 @@ public class LyricLanguageDAO extends BaseDAO{
 			ptmt = connection.prepareStatement(queryString);
 			resultSet = ptmt.executeQuery();
 			while(resultSet.next()) {
-				lang.setId(resultSet.getInt("id"));
+				lang.setLangId(resultSet.getInt("id"));
 				lang.setLanguage(resultSet.getString("lang_name"));
 				
 			}
@@ -37,7 +37,7 @@ public class LyricLanguageDAO extends BaseDAO{
 			ptmt.setInt(1, langId);
 			resultSet = ptmt.executeQuery();
 			while(resultSet.next()) {
-				lang.setId(resultSet.getInt("id"));
+				lang.setLangId(resultSet.getInt("id"));
 				lang.setLanguage(resultSet.getString("lang_name"));
 				
 			}

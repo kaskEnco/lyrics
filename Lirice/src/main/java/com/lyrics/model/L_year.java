@@ -7,15 +7,16 @@ public class L_year {
 	// @Column(name = "lyric_year")
 	// private Long lyircYear;
 
-	private int id;
+	private int yearId;
 	private int lyircYear;
 
-	public int getId() {
-		return id;
+	
+	public int getYearId() {
+		return yearId;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setYearId(int yearId) {
+		this.yearId = yearId;
 	}
 
 	public int getLyircYear() {

@@ -2,16 +2,34 @@ package com.lyrics.model;
 
 public class TrendingMovies {
 
-	private L_movie movie;
+	private int movieId;
+	private String movieName;
 	private int lyricViews;
 	private String lyric_name;
+	private String writerName;
 
-	public L_movie getMovie() {
-		return movie;
+	public String getWriterName() {
+		return writerName;
 	}
 
-	public void setMovie(L_movie movie) {
-		this.movie = movie;
+	public void setWriterName(String writerName) {
+		this.writerName = writerName;
+	}
+
+	public int getMovieId() {
+		return movieId;
+	}
+
+	public void setMovieId(int movieId) {
+		this.movieId = movieId;
+	}
+
+	public String getMovieName() {
+		return movieName;
+	}
+
+	public void setMovieName(String movieName) {
+		this.movieName = movieName;
 	}
 
 	public int getLyricViews() {

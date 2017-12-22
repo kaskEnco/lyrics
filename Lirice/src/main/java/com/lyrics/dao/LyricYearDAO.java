@@ -16,7 +16,7 @@ public class LyricYearDAO extends BaseDAO{public List<L_year> findAll() {
 		resultSet = ptmt.executeQuery();
 		while(resultSet.next()) {
 			year = new L_year();
-			year.setId(resultSet.getInt("id"));
+			year.setYearId(resultSet.getInt("id"));
 			year.setLyircYear(resultSet.getInt("lyric_year"));
 			years.add(year);
 		}
@@ -38,7 +38,7 @@ public L_year findById(int Id) {
 		ptmt.setInt(1, Id);
 		resultSet = ptmt.executeQuery();
 		while(resultSet.next()) {
-			year.setId(resultSet.getInt("id"));
+			year.setYearId(resultSet.getInt("id"));
 			year.setLyircYear(resultSet.getInt("lyric_year"));
 			
 		}

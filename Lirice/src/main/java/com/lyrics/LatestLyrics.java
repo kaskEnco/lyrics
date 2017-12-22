@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lyrics.dao.LyricContentDAO;
 import com.lyrics.dao.LyricMovieDAO;
 import com.lyrics.dao.LyricYearDAO;
 import com.lyrics.model.TrendingMovies;
@@ -49,10 +50,12 @@ public class LatestLyrics {
 	@GetMapping(value = "/trending", produces = "application/json")
 	@Transactional
 	public List<TrendingMovies> findTrending() {
-		List<TrendingMovies> movies = null;
+		List<TrendingMovies> movies = new LyricContentDAO().getTrendingLyrics();
 		
 		return movies;
 	}
+	
+	
 	
 	
 	
