@@ -1,10 +1,12 @@
 package com.lyrics.dao;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.lyrics.model.L_movie;
+import com.lyrics.model.MoviesByYear;
 import com.lyrics.model.MoviesLatest;
 
 public class LyricMovieDAO extends BaseDAO{
@@ -86,5 +88,35 @@ public class LyricMovieDAO extends BaseDAO{
 		
 		
 		return moviesLatest;
+	}
+	
+	public List <MoviesByYear> findByYear(int yearId){
+		MoviesByYear movieYear;
+		List<MoviesByYear> movieYears = new ArrayList<MoviesByYear>();
+		String queryString = "SELECT * FROM lyrics.l_movie where movie_year_id = ?";
+		try {
+			connection = getConnection();
+			ptmt = connection.prepareStatement(queryString);
+			ptmt.setInt(1,new LyricYearDAO().findByYear(yearId));
+			resultSet = ptmt.executeQuery();
+			while(resultSet.next()){
+				movieYear = new MoviesByYear();
+				int movieId = resultSet.getInt("id");
+				movieYear.setMovieId(movieId);
+				movieYear.setMovieName(resultSet.getString("movie_name"));
+				movieYear.setYear(yearId);
+				movieYears.add(movieYear);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return movieYears;
+	}
+
+	private int getYear(Timestamp timestamp) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
