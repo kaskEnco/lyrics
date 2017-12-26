@@ -11,7 +11,7 @@ public class LyricYearDAO extends BaseDAO {
 	public List<L_year> findAll() {
 		List<L_year> years = new ArrayList<L_year>();
 		L_year year = null;
-		String queryString = "SELECT * FROM L_year ";
+		String queryString = "SELECT * FROM l_year ";
 		try {
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);
@@ -32,7 +32,7 @@ public class LyricYearDAO extends BaseDAO {
 
 	public L_year findById(int Id) {
 		L_year year = new L_year();
-		String queryString = "SELECT * FROM L_year where id = ?  ";
+		String queryString = "SELECT * FROM l_year where id = ?  ";
 		try {
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);
@@ -53,7 +53,7 @@ public class LyricYearDAO extends BaseDAO {
 
 	public int findByYear(int year){
 		int yearId =0;
-		String queryString = "SELECT id FROM L_year where lyric_year = ?  ";
+		String queryString = "SELECT id FROM l_year where lyric_year = ?  ";
 		try {
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);

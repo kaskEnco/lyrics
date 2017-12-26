@@ -33,7 +33,15 @@ public class LatestLyrics {
 		    return map;
 	  }
 	
-	@GetMapping(value = "/years/{year}", produces = "application/json")
+	@GetMapping(value = "/years", produces = "application/json")
+	@Transactional
+	public List<L_year> findYears() {
+		List<L_year> years = new LyricYearDAO().findAll();
+		
+		return years;
+	}
+	
+	@GetMapping(value = "/year/{year}", produces = "application/json")
 	@Transactional
 	public List<MoviesByYear> findByMovieYear(@PathVariable int year) {
 		List<MoviesByYear> years = new LyricMovieDAO().findByYear(year);
