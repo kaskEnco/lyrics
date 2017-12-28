@@ -1,5 +1,7 @@
 package com.lyrics.dao;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -16,6 +18,8 @@ public class LyricMovieDAO extends BaseDAO{
 		L_movie movie = new L_movie();
 		LyricLanguageDAO langDAO = new LyricLanguageDAO();
 		LyricYearDAO yearDAO = new LyricYearDAO();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM l_movie ";
 		try {
 			connection = getConnection();
@@ -33,6 +37,10 @@ public class LyricMovieDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 		
 		return  movie;
@@ -42,6 +50,8 @@ public class LyricMovieDAO extends BaseDAO{
 		L_movie movie = new L_movie();
 		LyricLanguageDAO langDAO = new LyricLanguageDAO();
 		LyricYearDAO yearDAO = new LyricYearDAO();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM l_movie WHERE (id = ? )";
 		try {
 			connection = getConnection();
@@ -60,6 +70,10 @@ public class LyricMovieDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 		
 		return  movie;
@@ -68,6 +82,8 @@ public class LyricMovieDAO extends BaseDAO{
 	public List<MoviesLatest> findLatest(){
 		MoviesLatest latest;
 		List<MoviesLatest> moviesLatest = new ArrayList<MoviesLatest>();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM lyrics.l_movie ORDER BY movie_release_date DESC LIMIT 15";
 		try {
 			connection = getConnection();
@@ -84,6 +100,10 @@ public class LyricMovieDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 		
 		
@@ -93,6 +113,8 @@ public class LyricMovieDAO extends BaseDAO{
 	public List <MoviesByYear> findByYear(int yearId){
 		MoviesByYear movieYear;
 		List<MoviesByYear> movieYears = new ArrayList<MoviesByYear>();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM lyrics.l_movie where movie_year_id = ?";
 		try {
 			connection = getConnection();
@@ -110,11 +132,16 @@ public class LyricMovieDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 		
 		return movieYears;
 	}
 
+	
 	private int getYear(Timestamp timestamp) {
 		// TODO Auto-generated method stub
 		return 0;

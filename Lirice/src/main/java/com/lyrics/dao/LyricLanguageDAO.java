@@ -1,5 +1,7 @@
 package com.lyrics.dao;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.lyrics.model.L_language;
@@ -10,6 +12,8 @@ public class LyricLanguageDAO extends BaseDAO{
 	
 	public L_language findALl() {
 		L_language lang = new L_language();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM l_language ";
 		try {
 			connection = getConnection();
@@ -30,6 +34,8 @@ public class LyricLanguageDAO extends BaseDAO{
 	
 	public L_language findById(int langId) {
 		L_language lang = new L_language();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM l_language where id = ?  ";
 		try {
 			connection = getConnection();
@@ -44,6 +50,10 @@ public class LyricLanguageDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 		
 		return  lang;

@@ -1,5 +1,7 @@
 package com.lyrics.dao;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +13,8 @@ public class LyricYearDAO extends BaseDAO {
 	public List<L_year> findAll() {
 		List<L_year> years = new ArrayList<L_year>();
 		L_year year = null;
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM l_year ";
 		try {
 			connection = getConnection();
@@ -25,6 +29,10 @@ public class LyricYearDAO extends BaseDAO {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 
 		return years;
@@ -32,6 +40,8 @@ public class LyricYearDAO extends BaseDAO {
 
 	public L_year findById(int Id) {
 		L_year year = new L_year();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM l_year where id = ?  ";
 		try {
 			connection = getConnection();
@@ -46,6 +56,10 @@ public class LyricYearDAO extends BaseDAO {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 
 		return year;
@@ -53,6 +67,8 @@ public class LyricYearDAO extends BaseDAO {
 
 	public int findByYear(int year){
 		int yearId =0;
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
 		String queryString = "SELECT id FROM l_year where lyric_year = ?  ";
 		try {
 			connection = getConnection();
@@ -65,6 +81,10 @@ public class LyricYearDAO extends BaseDAO {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 		return yearId;
 	}

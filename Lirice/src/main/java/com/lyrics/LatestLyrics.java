@@ -2,6 +2,7 @@ package com.lyrics;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 
@@ -15,75 +16,75 @@ import com.lyrics.dao.LyricYearDAO;
 import com.lyrics.model.TrendingMovies;
 import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_year;
+import com.lyrics.model.MoviesByWriter;
 import com.lyrics.model.MoviesByYear;
 import com.lyrics.model.MoviesLatest;
 
 @RestController
 public class LatestLyrics {
-	
-	@GetMapping(value = "/latest", produces = "application/json")
+
+	@GetMapping(value = "/test", produces = "application/json")
 	@Transactional
-	  public HashMap<String, String> test() {
-		
-		 HashMap<String, String> map = new HashMap<>();
-//		    map.put("key", "value");
-//		    map.put("foo", "bar");
-//		    map.put("aa", "bb");
-		 
-		    return map;
-	  }
-	
+	public TrendingMovies test() {
+
+		TrendingMovies map = new TrendingMovies();
+		map.setLyric_name("LyricOne");
+		map.setLyricViews(12324);
+		map.setMovieName("MovieOne");
+
+		// map.put("key", "value");
+		// map.put("foo", "bar");
+		// map.put("aa", "bb");
+
+		return map;
+	}
+
 	@GetMapping(value = "/years", produces = "application/json")
 	@Transactional
 	public List<L_year> findYears() {
 		List<L_year> years = new LyricYearDAO().findAll();
-		
+
 		return years;
 	}
-	
+
 	@GetMapping(value = "/year/{year}", produces = "application/json")
 	@Transactional
 	public List<MoviesByYear> findByMovieYear(@PathVariable int year) {
 		List<MoviesByYear> years = new LyricMovieDAO().findByYear(year);
-		
+
 		return years;
 	}
-	
+
 	@GetMapping(value = "/movies/{movieId}", produces = "application/json")
 	@Transactional
 	public List<L_lyrics> findByMovieId(@PathVariable int movieId) {
 		List<L_lyrics> lyrics = new LyricContentDAO().getLyricsByMovie(movieId);
-		
+
 		return lyrics;
 	}
-	
-	
+
 	@GetMapping(value = "/latestMovies", produces = "application/json")
 	@Transactional
-	public List<MoviesLatest> findLatestMovies() {
+	public  List<MoviesLatest> findLatestMovies() {
 		List<MoviesLatest> latestMovies = new LyricMovieDAO().findLatest();
-		
 		return latestMovies;
 	}
-	
-	
+
 	@GetMapping(value = "/trending", produces = "application/json")
 	@Transactional
 	public List<TrendingMovies> findTrending() {
 		List<TrendingMovies> movies = new LyricContentDAO().getTrendingLyrics();
-		
+
 		return movies;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
 
-   
-	
-	
+	@GetMapping(value = "/writer", produces = "application/json")
+	@Transactional
+	public HashMap<String, Set<String>> findByWriter() {
+		HashMap<String, Set<String>> map = new HashMap<>();
+		Set<String> writers = new LyricContentDAO().getWriter();
+		map.put("writers", writers);
+		return map;
+	}
+
 }

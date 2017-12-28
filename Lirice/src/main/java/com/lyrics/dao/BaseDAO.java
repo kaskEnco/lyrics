@@ -12,13 +12,14 @@ import java.text.SimpleDateFormat;
 public class BaseDAO {
 
 	Connection connection = null;
-	PreparedStatement ptmt = null;
-	ResultSet resultSet = null;
+	
 
-	protected Connection getConnection() throws SQLException {
-		Connection conn;
-		conn = LyricConnectionFactory.getInstance().getConnection();
-		return conn;
+	public Connection getConnection() throws SQLException {
+		if (connection == null) {
+			// System.out.println("creating new connection");
+			connection = LyricConnectionFactory.getInstance().getConnection();
+		}
+		return connection;
 	}
 
 	public BaseDAO() {
@@ -33,4 +34,48 @@ public class BaseDAO {
 		return timeStamp;
 	}
 	
+	public void closePtmt(PreparedStatement ptmt) {
+
+		try {
+			if (ptmt != null)
+				ptmt.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void closeConnection() {
+
+		// System.out.println("local connection : " + connection1);
+		// System.out.println("global connection : " + connection);
+		try {
+
+			if (connection != null)
+				connection.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+
+			connection = null;
+		}
+	}
+
+	public static void closeResultset(ResultSet resultSet) {
+
+		try {
+			if (resultSet != null)
+				resultSet.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
