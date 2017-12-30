@@ -16,6 +16,8 @@ import com.lyrics.dao.LyricYearDAO;
 import com.lyrics.model.TrendingMovies;
 import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_year;
+import com.lyrics.model.LyircsByMovie;
+import com.lyrics.model.LyricContent;
 import com.lyrics.model.MoviesByWriter;
 import com.lyrics.model.MoviesByYear;
 import com.lyrics.model.MoviesLatest;
@@ -39,12 +41,51 @@ public class LatestLyrics {
 		return map;
 	}
 
+	@GetMapping(value = "/latestMovies", produces = "application/json")
+	@Transactional
+	public List<MoviesLatest> findLatestMovies() {
+		List<MoviesLatest> latestMovies = new LyricMovieDAO().findLatest();
+		return latestMovies;
+	}
+
+	@GetMapping(value = "/latestMoviesAll", produces = "application/json")
+	@Transactional
+	public List<MoviesLatest> findAllLatestMovies() {
+		List<MoviesLatest> latestMovies = new LyricMovieDAO().findAllLatest();
+		return latestMovies;
+	}
+
+	@GetMapping(value = "/trending", produces = "application/json")
+	@Transactional
+	public List<TrendingMovies> findTrending() {
+		List<TrendingMovies> movies = new LyricContentDAO().getTrendingLyrics();
+
+		return movies;
+	}
+
+	@GetMapping(value = "/trendingAll", produces = "application/json")
+	@Transactional
+	public List<TrendingMovies> findAllTrending() {
+		List<TrendingMovies> movies = new LyricContentDAO().getAllTrendingMovies();
+
+		return movies;
+	}
+
 	@GetMapping(value = "/years", produces = "application/json")
 	@Transactional
 	public List<L_year> findYears() {
 		List<L_year> years = new LyricYearDAO().findAll();
 
 		return years;
+	}
+
+	@GetMapping(value = "/writer", produces = "application/json")
+	@Transactional
+	public HashMap<String, Set<String>> findByWriter() {
+		HashMap<String, Set<String>> map = new HashMap<>();
+		Set<String> writers = new LyricContentDAO().getWriter();
+		map.put("writers", writers);
+		return map;
 	}
 
 	@GetMapping(value = "/year/{year}", produces = "application/json")
@@ -57,34 +98,35 @@ public class LatestLyrics {
 
 	@GetMapping(value = "/movies/{movieId}", produces = "application/json")
 	@Transactional
-	public List<L_lyrics> findByMovieId(@PathVariable int movieId) {
-		List<L_lyrics> lyrics = new LyricContentDAO().getLyricsByMovie(movieId);
+	public List<LyircsByMovie> findByMovieId(@PathVariable int movieId) {
+		List<LyircsByMovie> lyrics = new LyricContentDAO().getLyricsByMovie(movieId);
 
 		return lyrics;
 	}
 
-	@GetMapping(value = "/latestMovies", produces = "application/json")
+	@GetMapping(value = "/writer/{writerName}", produces = "application/json")
 	@Transactional
-	public  List<MoviesLatest> findLatestMovies() {
-		List<MoviesLatest> latestMovies = new LyricMovieDAO().findLatest();
-		return latestMovies;
+	public List<MoviesByWriter> findByWriter(@PathVariable String writerName) {
+
+		List<MoviesByWriter> moviesByWriter = new LyricMovieDAO().getMoviesByWriter(writerName);
+
+		return moviesByWriter;
 	}
 
-	@GetMapping(value = "/trending", produces = "application/json")
+	@GetMapping(value = "/lyrics/{lyricId}", produces = "application/json")
 	@Transactional
-	public List<TrendingMovies> findTrending() {
-		List<TrendingMovies> movies = new LyricContentDAO().getTrendingLyrics();
+	public List<LyricContent> getLyrics(@PathVariable int lyricId) {
+		List<LyricContent> lyrics = new LyricContentDAO().getLyrics(lyricId);
 
-		return movies;
+		return lyrics;
 	}
 
-	@GetMapping(value = "/writer", produces = "application/json")
+	@GetMapping(value = "/lyrics/{movieId}/{writerName}", produces = "application/json")
 	@Transactional
-	public HashMap<String, Set<String>> findByWriter() {
-		HashMap<String, Set<String>> map = new HashMap<>();
-		Set<String> writers = new LyricContentDAO().getWriter();
-		map.put("writers", writers);
-		return map;
+	public List<LyircsByMovie> findByWriter(@PathVariable int movieId, @PathVariable String writerName) {
+		List<LyircsByMovie> moviesByWriter = new LyricContentDAO().getLyricsByWriterMovie(movieId, writerName);
+
+		return moviesByWriter;
 	}
 
 }

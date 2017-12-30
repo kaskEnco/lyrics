@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lyrics.model.L_movie;
+import com.lyrics.model.MoviesByWriter;
 import com.lyrics.model.MoviesByYear;
 import com.lyrics.model.MoviesLatest;
 
-public class LyricMovieDAO extends BaseDAO{
+public class LyricMovieDAO extends BaseDAO {
 
-	
 	public L_movie findALl() {
 		L_movie movie = new L_movie();
 		LyricLanguageDAO langDAO = new LyricLanguageDAO();
@@ -25,7 +25,7 @@ public class LyricMovieDAO extends BaseDAO{
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);
 			resultSet = ptmt.executeQuery();
-			while(resultSet.next()) {
+			while (resultSet.next()) {
 				movie.setMovieId(resultSet.getInt("id"));
 				movie.setLanguage(langDAO.findById(resultSet.getInt("lang_id")));
 				movie.setYear(yearDAO.findById(resultSet.getInt("movie_year_id")));
@@ -37,15 +37,15 @@ public class LyricMovieDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally {
+		} finally {
 			closeResultset(resultSet);
 			closePtmt(ptmt);
 			closeConnection();
 		}
-		
-		return  movie;
+
+		return movie;
 	}
-	
+
 	public L_movie findById(int id) {
 		L_movie movie = new L_movie();
 		LyricLanguageDAO langDAO = new LyricLanguageDAO();
@@ -58,7 +58,7 @@ public class LyricMovieDAO extends BaseDAO{
 			ptmt = connection.prepareStatement(queryString);
 			ptmt.setInt(1, id);
 			resultSet = ptmt.executeQuery();
-			while(resultSet.next()) {
+			while (resultSet.next()) {
 				movie.setMovieId(resultSet.getInt("id"));
 				movie.setLanguage(langDAO.findById(resultSet.getInt("lang_id")));
 				movie.setYear(yearDAO.findById(resultSet.getInt("movie_year_id")));
@@ -70,16 +70,16 @@ public class LyricMovieDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally {
+		} finally {
 			closeResultset(resultSet);
 			closePtmt(ptmt);
 			closeConnection();
 		}
-		
-		return  movie;
+
+		return movie;
 	}
-	
-	public List<MoviesLatest> findLatest(){
+
+	public List<MoviesLatest> findLatest() {
 		MoviesLatest latest;
 		List<MoviesLatest> moviesLatest = new ArrayList<MoviesLatest>();
 		PreparedStatement ptmt = null;
@@ -89,7 +89,7 @@ public class LyricMovieDAO extends BaseDAO{
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);
 			resultSet = ptmt.executeQuery();
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				latest = new MoviesLatest();
 				int movieId = resultSet.getInt("id");
 				latest.setMovieId(movieId);
@@ -100,17 +100,16 @@ public class LyricMovieDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally {
+		} finally {
 			closeResultset(resultSet);
 			closePtmt(ptmt);
 			closeConnection();
 		}
-		
-		
+
 		return moviesLatest;
 	}
-	
-	public List <MoviesByYear> findByYear(int yearId){
+
+	public List<MoviesByYear> findByYear(int yearId) {
 		MoviesByYear movieYear;
 		List<MoviesByYear> movieYears = new ArrayList<MoviesByYear>();
 		PreparedStatement ptmt = null;
@@ -119,9 +118,9 @@ public class LyricMovieDAO extends BaseDAO{
 		try {
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);
-			ptmt.setInt(1,new LyricYearDAO().findByYear(yearId));
+			ptmt.setInt(1, new LyricYearDAO().findByYear(yearId));
 			resultSet = ptmt.executeQuery();
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				movieYear = new MoviesByYear();
 				int movieId = resultSet.getInt("id");
 				movieYear.setMovieId(movieId);
@@ -132,18 +131,88 @@ public class LyricMovieDAO extends BaseDAO{
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally {
+		} finally {
 			closeResultset(resultSet);
 			closePtmt(ptmt);
 			closeConnection();
 		}
-		
+
 		return movieYears;
 	}
 
-	
 	private int getYear(Timestamp timestamp) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public List<MoviesByWriter> getMoviesByWriter(String writerName) {
+		// TODO Auto-generated method stub
+		MoviesByWriter movie;
+		List<Integer> movieIds = null;
+		List<MoviesByWriter> movies = new ArrayList<MoviesByWriter>();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
+		movieIds = new LyricContentDAO().getMovieIdsByWriter(writerName);
+		if (movieIds != null && movieIds.size() > 0) {
+			for(int i=0;i< movieIds.size();i++){
+				
+				String queryString = "SELECT movie_name,id FROM lyrics.l_movie where id = ? ";
+				try {
+					connection = getConnection();
+					ptmt = connection.prepareStatement(queryString);
+					ptmt.setInt(1, movieIds.get(i));
+					resultSet = ptmt.executeQuery();
+					while (resultSet.next()) {
+						movie = new MoviesByWriter();
+						movie.setMovieId(resultSet.getInt("id"));
+						movie.setMovieName(resultSet.getString("movie_name"));
+						movie.setWriterName(writerName);
+						movies.add(movie);
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					closeResultset(resultSet);
+					closePtmt(ptmt);
+					closeConnection();
+				}
+			}
+			
+		}
+
+		return movies;
+	}
+
+	public List<MoviesLatest> findAllLatest() {
+
+		MoviesLatest latest;
+		List<MoviesLatest> moviesLatest = new ArrayList<MoviesLatest>();
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
+		String queryString = "SELECT * FROM lyrics.l_movie ORDER BY movie_release_date DESC";
+		try {
+			connection = getConnection();
+			ptmt = connection.prepareStatement(queryString);
+			resultSet = ptmt.executeQuery();
+			while (resultSet.next()) {
+				latest = new MoviesLatest();
+				int movieId = resultSet.getInt("id");
+				latest.setMovieId(movieId);
+				latest.setMovieName(resultSet.getString("movie_name"));
+				latest.setMovieReleaseDate(resultSet.getTimestamp("movie_release_date"));
+				moviesLatest.add(latest);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
+		}
+
+		return moviesLatest;
+
 	}
 }
