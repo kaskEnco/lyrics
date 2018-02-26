@@ -1,8 +1,9 @@
 package com.lyrics.model;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class L_lyrics {
+public class L_lyrics implements Serializable{
 
 	private int lyricId;
 	private String lyricTitle;

@@ -1,6 +1,8 @@
 package com.lyrics.model;
 
-public class L_language {
+import java.io.Serializable;
+
+public class L_language implements Serializable{
 
 	private int langId;
 	private String language;

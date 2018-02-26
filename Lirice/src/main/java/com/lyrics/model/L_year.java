@@ -1,6 +1,8 @@
 package com.lyrics.model;
 
-public class L_year {
+import java.io.Serializable;
+
+public class L_year implements Serializable{
 	// @Id
 	// private Long id;
 	//

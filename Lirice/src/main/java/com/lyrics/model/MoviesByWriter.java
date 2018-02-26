@@ -1,6 +1,8 @@
 package com.lyrics.model;
 
-public class MoviesByWriter {
+import java.io.Serializable;
+
+public class MoviesByWriter implements Serializable{
 	private int movieId;
 	private String movieName;
 	private String writerName;

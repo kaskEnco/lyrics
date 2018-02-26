@@ -1,6 +1,8 @@
 package com.lyrics.model;
 
-public class LyricContent {
+import java.io.Serializable;
+
+public class LyricContent implements Serializable {
 
 	private String lyricContent;
 

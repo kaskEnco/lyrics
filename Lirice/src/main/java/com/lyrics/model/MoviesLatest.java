@@ -1,9 +1,10 @@
 package com.lyrics.model;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
+//import java.util.List;
 
-public class MoviesLatest {
+public class MoviesLatest implements Serializable {
 
 	private int movieId;
 	private String movieName;

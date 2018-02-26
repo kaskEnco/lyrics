@@ -1,26 +1,24 @@
 package com.lyrics;
 
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-
 import javax.transaction.Transactional;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.lyrics.dao.LyricContentDAO;
 import com.lyrics.dao.LyricMovieDAO;
 import com.lyrics.dao.LyricYearDAO;
 import com.lyrics.model.TrendingMovies;
-import com.lyrics.model.L_lyrics;
+import com.lyrics.model.L_movie;
 import com.lyrics.model.L_year;
 import com.lyrics.model.LyircsByMovie;
 import com.lyrics.model.LyricContent;
 import com.lyrics.model.MoviesByWriter;
-import com.lyrics.model.MoviesByYear;
 import com.lyrics.model.MoviesLatest;
+
 
 @RestController
 public class LatestLyrics {
@@ -51,7 +49,10 @@ public class LatestLyrics {
 	@GetMapping(value = "/latestMoviesAll", produces = "application/json")
 	@Transactional
 	public List<MoviesLatest> findAllLatestMovies() {
+		long start_time = System.currentTimeMillis();
 		List<MoviesLatest> latestMovies = new LyricMovieDAO().findAllLatest();
+		long end_time = System.currentTimeMillis();
+		System.out.println("Executed in "+ (end_time - start_time) + " milliseconds");		
 		return latestMovies;
 	}
 
@@ -74,9 +75,8 @@ public class LatestLyrics {
 	@GetMapping(value = "/years", produces = "application/json")
 	@Transactional
 	public List<L_year> findYears() {
-		List<L_year> years = new LyricYearDAO().findAll();
-
-		return years;
+		List<L_year> years = new LyricYearDAO().findAllYears();
+	return years;
 	}
 
 	@GetMapping(value = "/writer", produces = "application/json")
@@ -90,8 +90,9 @@ public class LatestLyrics {
 
 	@GetMapping(value = "/year/{year}", produces = "application/json")
 	@Transactional
-	public List<MoviesByYear> findByMovieYear(@PathVariable int year) {
-		List<MoviesByYear> years = new LyricMovieDAO().findByYear(year);
+	public List<L_movie> findByMovieYear(@PathVariable int year) {
+		L_year lYear=new LyricYearDAO().findByYear(year);
+		List<L_movie> years = new LyricMovieDAO().findByYear(lYear);
 
 		return years;
 	}
@@ -128,5 +129,6 @@ public class LatestLyrics {
 
 		return moviesByWriter;
 	}
+	
 
 }

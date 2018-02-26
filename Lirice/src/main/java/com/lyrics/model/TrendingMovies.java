@@ -1,12 +1,23 @@
 package com.lyrics.model;
 
-public class TrendingMovies {
+import java.io.Serializable;
+
+public class TrendingMovies implements Serializable{
 
 	private int movieId;
 	private String movieName;
+	private int lyricId;
 	private int lyricViews;
 	private String lyric_name;
 	private String writerName;
+
+	public int getLyricId() {
+		return lyricId;
+	}
+
+	public void setLyricId(int lyricId) {
+		this.lyricId = lyricId;
+	}
 
 	public String getWriterName() {
 		return writerName;

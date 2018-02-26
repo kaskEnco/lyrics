@@ -1,8 +1,9 @@
 package com.lyrics.model;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class L_movie {
+public class L_movie implements Serializable{
 
 	private int movieId;
 	private L_year year;
@@ -16,8 +17,8 @@ public class L_movie {
 	public L_year getYear() {
 		return year;
 	}
-	public void setYear(L_year year) {
-		this.year = year;
+	public void setYear(L_year i) {
+		this.year = i;
 	}
 	public L_language getLanguage() {
 		return language;
@@ -54,5 +55,6 @@ public class L_movie {
 	private Timestamp movieReleaseDate;
 	private Timestamp creationDate;
 	private Timestamp updationDate;
+
 
 }
