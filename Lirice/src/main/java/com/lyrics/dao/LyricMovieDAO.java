@@ -143,7 +143,7 @@ public class LyricMovieDAO extends BaseDAO {
 		if (movieIds != null && movieIds.size() > 0) {
 			for (int i = 0; i < movieIds.size(); i++) {
 
-				String queryString = "SELECT movie_name,id FROM lyrics.l_movie where id = ? ";
+				String queryString = "SELECT movie_name,id,movie_release_date FROM lyrics.l_movie where id = ? ";
 				try {
 					connection = getConnection();
 					ptmt = connection.prepareStatement(queryString);
@@ -154,6 +154,8 @@ public class LyricMovieDAO extends BaseDAO {
 						movie.setMovieId(resultSet.getInt("id"));
 						movie.setMovieName(resultSet.getString("movie_name"));
 						movie.setWriterName(writerName);
+						movie.setMovieReleaseDate(resultSet.getTimestamp("movie_release_date"));
+						//movie.setMovieId(movieId);
 						movies.add(movie);
 					}
 				} catch (SQLException e) {

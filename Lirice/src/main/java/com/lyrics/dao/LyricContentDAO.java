@@ -7,8 +7,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.json.simple.JSONObject;
 
 import com.lyrics.Constants;
 import com.lyrics.model.L_lyrics;
@@ -17,6 +20,11 @@ import com.lyrics.model.LyircsByMovie;
 import com.lyrics.model.LyricContent;
 import com.lyrics.model.MoviesByWriter;
 import com.lyrics.model.TrendingMovies;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.MongoClient;
 
 import net.spy.memcached.MemcachedClient;
 
@@ -193,6 +201,7 @@ public class LyricContentDAO extends BaseDAO {
 				if( lyricId == list.getLyricId()) {
 					content = new LyricContent();
 					content.setLyricContent(list.getLyricContent());
+					content.setUrl(list.getUrl());
 					lyrics.add(content);
 					break;
 				}
@@ -249,8 +258,10 @@ public class LyricContentDAO extends BaseDAO {
 				L_movie movie = movieDAO.findById(resultSet.getInt("movie_id"));
 				lyric.setMovieId(movie.getMovieId());
 				lyric.setMovieName(movie.getMovieName());
+				lyric.setReleaseDate(movie.getMovieReleaseDate());
 				lyric.setWriterName(resultSet.getString("writer_name"));
 				lyric.setLyricViews(resultSet.getInt("lyric_views"));
+				
 				trendingLyrics.add(lyric);
 			}
 			cache.add(Constants.LATEST_TRENDING_KEY, 0, trendingLyrics);
@@ -353,5 +364,28 @@ public class LyricContentDAO extends BaseDAO {
 		return movies;*/
 
 	}
+	public List<LyricContent> getTeluguLyrics(int idTelugu) {
+		LyricContent content;
+		List<LyricContent> lyrics = new ArrayList<LyricContent>();
+
+		MongoClient mongoClient = new MongoClient("localhost", 27017);
+		DB db = mongoClient.getDB("lyrics");
+		DBCollection collection = db.getCollection("teluguLyrics");
+		BasicDBObject searchQuery = new BasicDBObject();
+		searchQuery.put("_id", idTelugu);
+		DBCursor cursorEvents = collection.find(searchQuery);
+
+		Object value = null;
+		if (cursorEvents.hasNext()) {
+			value = cursorEvents.next();
+			JSONObject obj = new JSONObject((Map) value);
+			content = new LyricContent();
+			content.setLyricContent( (String) obj.get("lyricContent"));
+			content.setUrl((String) obj.get("url"));
+			lyrics.add(content);
+		}
+		return lyrics;
+	}
+
 
 }

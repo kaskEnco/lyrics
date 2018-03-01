@@ -1,6 +1,7 @@
 package com.lyrics.model;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 public class TrendingMovies implements Serializable{
 
@@ -10,6 +11,15 @@ public class TrendingMovies implements Serializable{
 	private int lyricViews;
 	private String lyric_name;
 	private String writerName;
+	private Timestamp movieReleaseDate;
+
+	public Timestamp getReleaseDate() {
+		return movieReleaseDate;
+	}
+	
+	public void setReleaseDate(Timestamp timestamp) {
+		this.movieReleaseDate = timestamp;
+	}
 
 	public int getLyricId() {
 		return lyricId;

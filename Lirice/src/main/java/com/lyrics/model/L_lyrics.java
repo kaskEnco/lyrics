@@ -1,6 +1,7 @@
 package com.lyrics.model;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.sql.Timestamp;
 
 public class L_lyrics implements Serializable{
@@ -13,7 +14,7 @@ public class L_lyrics implements Serializable{
 	private int lyricViews;
 	private Timestamp creationDate;
 	private Timestamp updationDate;
-
+	private String url;
 	
 
 	public int getLyricId() {
@@ -79,5 +80,16 @@ public class L_lyrics implements Serializable{
 	public void setUpdationDate(Timestamp updationDate) {
 		this.updationDate = updationDate;
 	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+
+	
 
 }

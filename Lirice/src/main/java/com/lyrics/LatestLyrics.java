@@ -38,6 +38,14 @@ public class LatestLyrics {
 
 		return map;
 	}
+	
+	@GetMapping(value = "/teluguLyrics/{idTelugu}", produces = "application/json")
+	@Transactional
+	public List<LyricContent> findTeluguLyrics(@PathVariable int idTelugu) {
+		List<LyricContent> lyrics = new LyricContentDAO().getTeluguLyrics(idTelugu);
+
+		return lyrics;
+	}
 
 	@GetMapping(value = "/latestMovies", produces = "application/json")
 	@Transactional

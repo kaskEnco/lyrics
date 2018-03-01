@@ -214,6 +214,7 @@ public class BaseDAO {
 				lyric.setLyricViews(resultSet.getInt("lyric_views"));
 				lyric.setCreationDate(resultSet.getTimestamp("creation_time"));
 				lyric.setUpdationDate(resultSet.getTimestamp("updation_time"));
+				lyric.setUrl(resultSet.getString("url"));
 				lyrics.add(lyric);
 			}
 			cache.add(Constants.LYRIC_CONTENT, 0, lyrics);
