@@ -1,7 +1,5 @@
 package com.lyrics.dao;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,15 +16,12 @@ import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_movie;
 import com.lyrics.model.LyircsByMovie;
 import com.lyrics.model.LyricContent;
-import com.lyrics.model.MoviesByWriter;
 import com.lyrics.model.TrendingMovies;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.MongoClient;
-
-import net.spy.memcached.MemcachedClient;
 
 public class LyricContentDAO extends BaseDAO {
 

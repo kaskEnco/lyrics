@@ -11,7 +11,6 @@ import com.lyrics.Constants;
 import com.lyrics.model.L_movie;
 import com.lyrics.model.L_year;
 import com.lyrics.model.MoviesByWriter;
-import com.lyrics.model.MoviesByYear;
 import com.lyrics.model.MoviesLatest;
 
 public class LyricMovieDAO extends BaseDAO {

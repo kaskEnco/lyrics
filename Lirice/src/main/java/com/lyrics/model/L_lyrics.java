@@ -1,7 +1,6 @@
 package com.lyrics.model;
 
 import java.io.Serializable;
-import java.net.URL;
 import java.sql.Timestamp;
 
 public class L_lyrics implements Serializable{
