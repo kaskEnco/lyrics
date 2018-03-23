@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import javax.transaction.Transactional;
+
+import org.apache.solr.common.SolrDocument;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import com.lyrics.dao.LyricContentDAO;
 import com.lyrics.dao.LyricMovieDAO;
 import com.lyrics.dao.LyricYearDAO;
+
 import com.lyrics.model.TrendingMovies;
 import com.lyrics.model.L_movie;
 import com.lyrics.model.L_year;
@@ -19,6 +22,7 @@ import com.lyrics.model.LyricContent;
 import com.lyrics.model.MoviesByWriter;
 import com.lyrics.model.MoviesLatest;
 
+import com.lyrics.dao.SolrSearchDAO;
 
 @RestController
 public class LatestLyrics {
@@ -38,6 +42,13 @@ public class LatestLyrics {
 
 		return map;
 	}
+	
+	@GetMapping(value = "/search/{Searchvalue}", produces = "application/json")
+	public List<SolrDocument> findSearch(@PathVariable String Searchvalue) {
+		List<SolrDocument> searchOp = new SolrSearchDAO().findSearch(Searchvalue);
+		return searchOp;
+	}
+
 	
 	@GetMapping(value = "/teluguLyrics/{idTelugu}", produces = "application/json")
 	@Transactional

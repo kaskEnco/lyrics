@@ -9,21 +9,33 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-
+import java.util.Map;
+import org.bson.Document;
+import org.json.simple.JSONObject;
 import com.lyrics.Constants;
 import com.lyrics.model.L_language;
 import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_movie;
 import com.lyrics.model.L_year;
-
+import com.lyrics.model.LyricContent;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import net.spy.memcached.MemcachedClient;
 
 public class BaseDAO {
 
 	Connection connection = null;
 	MemcachedClient cache = null;
-	
 
 	public Connection getConnection() throws SQLException {
 		if (connection == null) {
@@ -103,15 +115,13 @@ public class BaseDAO {
 		}
 	}
 
-	
-
 	public List<L_year> findAllYears() {
 		List<L_year> years = null;
-		if(Constants.USE_MEMCACHED) {
+		if (Constants.USE_MEMCACHED) {
 			cache = getMemcacheConnection();
 			years = (List<L_year>) cache.get(Constants.YEARS_KEY);
 		}
-		
+
 		if (years != null)
 			return years;
 
@@ -145,9 +155,6 @@ public class BaseDAO {
 
 	}
 
-	
-
-	
 	public List<L_language> findAllLanguges() {
 		List<L_language> languages = null;
 		L_language lang;
@@ -231,7 +238,6 @@ public class BaseDAO {
 		return lyrics;
 	}
 
-	
 	public List<L_movie> findAllMovies() {
 		List<L_movie> movies = null;
 		if (Constants.USE_MEMCACHED) {
@@ -242,7 +248,6 @@ public class BaseDAO {
 		if (movies != null)
 			return movies;
 
-		
 		movies = new ArrayList<L_movie>();
 		LyricLanguageDAO langDAO = new LyricLanguageDAO();
 		LyricYearDAO yearDAO = new LyricYearDAO();
@@ -252,12 +257,12 @@ public class BaseDAO {
 		try {
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);
-			resultSet = ptmt.executeQuery(); 
+			resultSet = ptmt.executeQuery();
 			while (resultSet.next()) {
 				L_movie movie = new L_movie();
 				movie.setMovieId(resultSet.getInt("id"));
 				movie.setLanguage(langDAO.findById(resultSet.getInt("lang_id")));
-			    movie.setYear(yearDAO.findById(resultSet.getInt("movie_year_id")));
+				movie.setYear(yearDAO.findById(resultSet.getInt("movie_year_id")));
 				movie.setMovieName(resultSet.getString("movie_name"));
 				movie.setMovieReleaseDate(resultSet.getTimestamp("movie_release_date"));
 				movie.setCreationDate(resultSet.getTimestamp("creation_time"));
@@ -277,4 +282,39 @@ public class BaseDAO {
 		return movies;
 	}
 
+	public List<L_lyrics> findAllTeluguLyrics() {
+
+		List<L_lyrics> teluguLyrics = null;
+		L_lyrics content;
+
+		if (Constants.USE_MEMCACHED) {
+			cache = getMemcacheConnection();
+			teluguLyrics = (List<L_lyrics>) cache.get(Constants.TELUGU_LYRIC_CONTENT);
+		}
+
+		if (teluguLyrics != null)
+			return teluguLyrics;
+
+		teluguLyrics = new ArrayList<L_lyrics>();
+		MongoClient mongoClient = new MongoClient("localhost", 27017);
+		DB db = mongoClient.getDB("lyrics");
+		DBCollection collection = db.getCollection("teluguLyrics");
+		DBCursor cursor = collection.find();
+
+		int n = collection.find().count();
+		Object value = null;
+			for(DBObject contents : cursor) {
+				value = cursor.next();
+				JSONObject obj = new JSONObject((Map) value);
+				contents = (DBObject) new L_lyrics();
+				((L_lyrics) contents).set_id((int) obj.get("_id"));
+				((L_lyrics) contents).setLyricContent((String) obj.get("lyricContent"));
+				((L_lyrics) contents).setUrl((String) obj.get("url"));
+				teluguLyrics.add((L_lyrics) contents);
+				
+		}
+		cache.add(Constants.TELUGU_LYRIC_CONTENT, 0, teluguLyrics);
+
+		return teluguLyrics;
+	}
 }

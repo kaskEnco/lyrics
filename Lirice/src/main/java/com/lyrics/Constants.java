@@ -12,4 +12,7 @@ public class Constants {
 	public final static String MOVIES_LIST = "movies";
 	public final static String LANG_LIST = "langlist";
 	public final static String LYRIC_CONTENT = "lyricContent" ;
+
+	public static final String TELUGU_LYRIC_CONTENT = "teluguLyrics";
+
 }
