@@ -48,7 +48,7 @@ public class LyricContentDAO extends BaseDAO {
 
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+	
 			e.printStackTrace();
 		} finally {
 			closeResultset(resultSet);
@@ -91,7 +91,7 @@ public class LyricContentDAO extends BaseDAO {
 		 * lyric.setLyricTitle(resultSet.getString("lyric_title"));
 		 * lyric.setMovieId(resultSet.getInt("movie_id"));
 		 * lyric.setWriterName(resultSet.getString("writer_name"));
-		 * allLyrics.add(lyric); } } catch (SQLException e) { // TODO Auto-generated
+		 * allLyrics.add(lyric); } } catch (SQLException e) { 
 		 * catch block e.printStackTrace(); } finally { closeResultset(resultSet);
 		 * closePtmt(ptmt); closeConnection(); }
 		 * 
@@ -130,8 +130,7 @@ public class LyricContentDAO extends BaseDAO {
 		 * lyric.setMovieName(movie.getMovieName());
 		 * lyric.setWriterName(resultSet.getString("writer_name"));
 		 * lyric.setLyricViews(resultSet.getInt("lyric_views"));
-		 * trendingLyrics.add(lyric); } } catch (SQLException e) { // TODO
-		 * Auto-generated catch block e.printStackTrace(); } finally {
+		 * trendingLyrics.add(lyric); } } catch (SQLException e) { e.printStackTrace(); } finally {
 		 * closeResultset(resultSet); closePtmt(ptmt); closeConnection(); }
 		 * 
 		 * return trendingLyrics;
@@ -139,7 +138,7 @@ public class LyricContentDAO extends BaseDAO {
 	}
 
 	public Set<String> getWriter() {
-		// TODO Auto-generated method stub
+		
 
 		TreeSet<String> writerSet = new TreeSet<String>();
 		PreparedStatement ptmt = null;
@@ -153,7 +152,7 @@ public class LyricContentDAO extends BaseDAO {
 				writerSet.add(resultSet.getString("writer_name"));
 			}
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 		} finally {
 			closeResultset(resultSet);
@@ -164,7 +163,7 @@ public class LyricContentDAO extends BaseDAO {
 	}
 
 	public List<LyricContent> getLyrics(int lyricId) {
-		// TODO Auto-generated method stub
+		
 		LyricContent content;
 		List<LyricContent> lyrics = null;
 		List<L_lyrics> allLyrics = findAllLyrics();
@@ -191,8 +190,7 @@ public class LyricContentDAO extends BaseDAO {
 		 * = ptmt.executeQuery(); while (resultSet.next()) { content = new
 		 * LyricContent();
 		 * content.setLyricContent(resultSet.getString("lyric_content"));
-		 * lyrics.add(content); } } catch (SQLException e) { // TODO Auto-generated
-		 * catch block e.printStackTrace(); }
+		 * lyrics.add(content); } } catch (SQLException e) { e.printStackTrace(); }
 		 * 
 		 * return lyrics;
 		 */
@@ -200,7 +198,7 @@ public class LyricContentDAO extends BaseDAO {
 
 	public List<TrendingMovies> getAllTrendingMovies() {
 		List<TrendingMovies> trendingLyrics = null;
-
+	//	List<L_movie> trendingLyrics1 = findAllMovies();
 		if (Constants.USE_MEMCACHED) {
 			cache = getMemcacheConnection();
 			trendingLyrics = (List<TrendingMovies>) cache.get(Constants.LATEST_TRENDING_KEY);
@@ -234,7 +232,7 @@ public class LyricContentDAO extends BaseDAO {
 			}
 			cache.add(Constants.LATEST_TRENDING_KEY, 0, trendingLyrics);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		
 			e.printStackTrace();
 		} finally {
 			closeResultset(resultSet);
@@ -275,7 +273,7 @@ public class LyricContentDAO extends BaseDAO {
 		 * lyric.setMovieId(movieId); lyric.setWriterName(writerName);
 		 * allLyrics.add(lyric);
 		 * 
-		 * } } catch (SQLException e) { // TODO Auto-generated catch block
+		 * } } catch (SQLException e) { 
 		 * e.printStackTrace(); } finally { closeResultset(resultSet); closePtmt(ptmt);
 		 * closeConnection(); }
 		 * 
@@ -284,9 +282,7 @@ public class LyricContentDAO extends BaseDAO {
 	}
 
 	public List<Integer> getMovieIdsByWriter(String writerName) {
-		// TODO Auto-generated method stub
-
-		// TODO Auto-generated method stub
+		
 		int movieId;
 		List<Integer> movies = new ArrayList<Integer>();
 		List<L_lyrics> lyrics = findAllLyrics();
@@ -307,7 +303,7 @@ public class LyricContentDAO extends BaseDAO {
 		 * connection.prepareStatement(queryString); ptmt.setString(1, writerName);
 		 * resultSet = ptmt.executeQuery(); while (resultSet.next()) { movieId =
 		 * resultSet.getInt("movie_id"); movies.add(movieId); } } catch (SQLException e)
-		 * { // TODO Auto-generated catch block e.printStackTrace(); }
+		 * {  e.printStackTrace(); }
 		 * 
 		 * return movies;
 		 */
@@ -344,7 +340,9 @@ public class LyricContentDAO extends BaseDAO {
 					content.setLyricContent(lyric.getLyricContent());
 					content.setUrl(lyric.getUrl());
 					alllyrics.add(content);
+					break;
 				}
+			
 			}
 		}
 

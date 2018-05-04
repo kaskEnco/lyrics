@@ -2,10 +2,10 @@ package com.lyrics.dao;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.OperationTimeoutException;
 
 public class MemcachedConncetionFactory {
 
@@ -21,14 +21,15 @@ public class MemcachedConncetionFactory {
 		}
 	}
 
-	public static MemcachedConncetionFactory getInstance() {
+	public static MemcachedConncetionFactory getInstance() throws OperationTimeoutException{
 		if (memcacheConnection == null) {
 			synchronized (MemcachedConncetionFactory.class) {
 				if (memcacheConnection == null) {
-					memcacheConnection = new MemcachedConncetionFactory();
+					memcacheConnection = new MemcachedConncetionFactory();;
 				}
 			}
 		}
+        
 		return memcacheConnection;
 	}
 

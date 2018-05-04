@@ -1,5 +1,6 @@
 package com.lyrics.dao;
 
+import java.net.SocketException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -13,8 +14,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.bson.Document;
 import org.json.simple.JSONObject;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import com.lyrics.Constants;
 import com.lyrics.model.L_language;
 import com.lyrics.model.L_lyrics;
@@ -284,6 +292,10 @@ public class BaseDAO {
 
 	public List<L_lyrics> findAllTeluguLyrics() {
 
+		/*HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+		        .getRequest();
+		request.getHeader("X-FORWARDED-FOR");
+		String ip = request.getRemoteAddr();*/
 		List<L_lyrics> teluguLyrics = null;
 		L_lyrics content;
 
@@ -303,18 +315,53 @@ public class BaseDAO {
 
 		int n = collection.find().count();
 		Object value = null;
-			for(DBObject contents : cursor) {
+			for(int i = 0; i < n; i++) {
 				value = cursor.next();
 				JSONObject obj = new JSONObject((Map) value);
-				contents = (DBObject) new L_lyrics();
-				((L_lyrics) contents).set_id((int) obj.get("_id"));
-				((L_lyrics) contents).setLyricContent((String) obj.get("lyricContent"));
-				((L_lyrics) contents).setUrl((String) obj.get("url"));
-				teluguLyrics.add((L_lyrics) contents);
+				content = new L_lyrics();
+				content.set_id((int) obj.get("_id"));
+				content.setLyricContent((String) obj.get("lyricContent"));
+				content.setUrl((String) obj.get("url"));
+				
+				teluguLyrics.add(content);
+				
 				
 		}
 		cache.add(Constants.TELUGU_LYRIC_CONTENT, 0, teluguLyrics);
 
 		return teluguLyrics;
 	}
+
+	public void Count(int lyricId) {
+		PreparedStatement ptmt = null;
+		int resultSet ;
+		String queryString = "update l_lyrics set lyric_views = lyric_views+1 where id = ? ";
+		try {
+			connection = getConnection();
+			ptmt = connection.prepareStatement(queryString);
+			ptmt.setInt(1, lyricId);
+			resultSet = ptmt.executeUpdate();
+			connection.close();
+			/*while(resultSet.next()) {
+				int count = resultSet.getInt(1);
+			}*/
+	}catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	/*	try {
+			connection = getConnection();
+		
+		PreparedStatement stmt=connection.prepareStatement("update l_lyrics set count = count+1 where id=?");  
+		stmt.setInt(1,lyricId);//1 specifies the first parameter in the query i.e. name  
+		  
+		  
+		int i=stmt.executeUpdate();  
+		System.out.println(i+" records updated");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+	}
+
 }
