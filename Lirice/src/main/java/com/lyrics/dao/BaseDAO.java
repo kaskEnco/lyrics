@@ -174,7 +174,7 @@ public class BaseDAO {
 		if (languages != null)
 			return languages;
 
-		lang = new L_language();
+		
 		PreparedStatement ptmt = null;
 		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM l_language ";
@@ -185,6 +185,7 @@ public class BaseDAO {
 			resultSet = ptmt.executeQuery();
 			languages = new ArrayList<L_language>();
 			while (resultSet.next()) {
+				lang = new L_language();
 				lang.setLangId(resultSet.getInt("id"));
 				lang.setLanguage(resultSet.getString("lang_name"));
 				languages.add(lang);

@@ -1,6 +1,7 @@
 package com.lyrics.dao;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import javax.naming.Context;
@@ -9,7 +10,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 public class LyricConnectionFactory {
-	static String driverClassName = "com.mysql.jdbc.Driver";
+/*	static String driverClassName = "com.mysql.jdbc.Driver";
 	
 	//for AWS RDS
 	//static String connectionUrl = "jdbc:mysql://kask-db-instance.c1rialg0ee8x.us-east-1.rds.amazonaws.com:3306/lyrics";
@@ -54,16 +55,21 @@ public class LyricConnectionFactory {
 //		 conn = DriverManager.getConnection(connectionUrl, dbUser, dbPwd);
 //		return conn;
 //	}
-	
+*/	private static LyricConnectionFactory connectionFactory = null;
 	public Connection getConnection() throws SQLException {
 		Connection conn = null;
-
+		try{  
+			Class.forName("com.mysql.jdbc.Driver");  
+			conn=DriverManager.getConnection(  
+			"jdbc:mysql://localhost:3306/lyrics","root","root");  
+		}catch(Exception e){ System.out.println(e);} 
+/*
 		//for RDS/JNDI
 		conn = dataSource.getConnection();
 
 		  // for Local
 		 //conn = DriverManager.getConnection(connectionUrl, dbUser, dbPwd);
-		return conn;
+*/		return conn;
 	}
 	
 	public static LyricConnectionFactory getInstance() {

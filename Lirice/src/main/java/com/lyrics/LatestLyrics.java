@@ -58,12 +58,66 @@ public class LatestLyrics {
 	public String MailDescription(@RequestBody Mail mail){
 		String mailSent=new SendingMailDAO().sendMial(mail);
 
-		return "success";
+		return mailSent;
 	
 	}
 	
 	
 
+	/*
+	 * @GetMapping(value = "/session", produces = "application/json") private
+	 * Map<String, String> getHeadersInfo(HttpServletRequest request, HttpSession
+	 * httpSession) { final String sessionIds = request.getSession().getId();
+	 * Map<String, String> map = new HashMap<String, String>();
+	 * 
+	 * Enumeration headerNames = request.getHeaderNames(); while
+	 * (headerNames.hasMoreElements()) { String key = (String)
+	 * headerNames.nextElement(); String value = request.getHeader(key); String user
+	 * = request.getRemoteAddr(); map.put(key, value); map.put("user", user); }
+	 * map.put("id", sessionIds); HttpSession session = request.getSession();
+	 * session.setAttribute("session", session);
+	 * 
+	 * Enumeration<String> attributes = httpSession.getAttributeNames(); String id =
+	 * httpSession.getId(); long timeLast = httpSession.getLastAccessedTime();
+	 * httpSession.setMaxInactiveInterval(120); long max =
+	 * httpSession.getMaxInactiveInterval(); httpSession.invalidate();
+	 * httpSession.setAttribute("id", id); String did = httpSession.getId();
+	 * map.put("id", id); map.put("timeLast", timeLast); map.put("max", max);
+	 * map.put("did", did); httpSession.setAttribute("details", map); String
+	 * userSession = request.getRemoteAddr(); httpSession.setAttribute("ip",
+	 * userSession); httpSession.setMaxInactiveInterval(300);
+	 * httpSession.getAttribute(userSession); httpSession.getAttributeNames();
+	 * httpSession.getCreationTime(); httpSession.getLastAccessedTime();
+	 * httpSession.getServletContext(); httpSession.getMaxInactiveInterval();
+	 * 
+	 * return httpSession; return map; }
+	 * 
+	 * 
+	 * @GetMapping("/SessionRepository") public SessionRepository<ExpiringSession>
+	 * sessionRepository() { return new MapSessionRepository(); }
+	 * 
+	 * 
+	 * 
+	 * private static final String TEMPLATE = "<table border=\"1\">" +
+	 * "<tr><th>id</th><th>creation time</th><th>last accessed time</th><th>ip</th></tr>"
+	 * + "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" +
+	 * "</table>";
+	 * 
+	 * @GetMapping("/") String sessionInfo(HttpSession session, HttpServletRequest
+	 * request) { session.isNew(); String userSession = request.getRemoteAddr();
+	 * session.setAttribute("ip", userSession); session.setMaxInactiveInterval(300);
+	 * 
+	 * return String.format(session.getId(), new Date(session.getCreationTime()),
+	 * new Date(session.getLastAccessedTime()), userSession, session); // return
+	 * session; }
+	 * 
+	 * 
+	 * @RequestMapping(value="/SessionValue", method=RequestMethod.GET) public
+	 * ModelAndView mainPage(HttpServletRequest request) { final String sessionIds =
+	 * request.getSession().getId(); ModelAndView mav = new ModelAndView("ip");
+	 * String user = request.getRemoteAddr(); mav.addObject("sValue", user);
+	 * mav.addObject(sessionIds) ; return mav; }
+	 */
 	@GetMapping(value = "/search/{Searchvalue}", produces = "application/json")
 	public List<SolrDocument> findSearch(@PathVariable String Searchvalue) {
 		/*
@@ -78,7 +132,32 @@ public class LatestLyrics {
 	@Transactional
 	public List<LyricContent> findTeluguLyrics(@PathVariable int idTelugu, HttpServletRequest request) {
 		List<LyricContent> lyrics = new LyricContentDAO().getTeluguLyrics(idTelugu);
-		
+		/*
+		 * Enumeration<String> user = request.getHeaderNames(); Enumeration headerNames
+		 * = request.getHeaderNames(); while (headerNames.hasMoreElements()) { String
+		 * key = (String) headerNames.nextElement(); String value =
+		 * request.getHeader(key);
+		 * 
+		 * }
+		 * 
+		 * String userSession = request.getRemoteAddr(); ModelMap m = new ModelMap();
+		 * m.put("ip", userSession);
+		 * 
+		 * // System.out.println(user); final String sessionIds =
+		 * request.getSession().getId();
+		 * 
+		 * 
+		 * ServletRequestAttributes attr = (ServletRequestAttributes)
+		 * RequestContextHolder.currentRequestAttributes(); String session =
+		 * attr.getRequest().getRequestedSessionId(); String session1 =
+		 * attr.getRequest().getRequestURI(); attr.getRequest().setAttribute("ip",
+		 * userSession); attr.getRequest().getAttribute(session);
+		 * attr.getRequest().getAttributeNames(); //request.getAttribute(session);
+		 * request.getSession(); request.getRequestedSessionId();
+		 * request.isRequestedSessionIdFromCookie(); // request.setAttribute("ip",
+		 * userSession); HttpSession session = request.getSession();
+		 * session.getAttribute("session");
+		 */
 		return lyrics;
 	}
 
@@ -116,7 +195,53 @@ public class LatestLyrics {
 		return movies;
 	}
 
+	/*void sessionInfo(HttpSession session, HttpServletRequest request) {
+		if (session.isNew()) {
+			String ipAddress = request.getRemoteAddr();
+			session.setAttribute("ip", ipAddress);
+			session.setMaxInactiveInterval(60);
+			String sessionId = session.getId();
+
+			Connection connection = null;
+			PreparedStatement ptmt = null;
+			int resultSet;
+			String queryString = "insert into session (sessionId, ip) values (?,?) ";
+			try {
+				BaseDAO base = new BaseDAO();
+				connection = base.getConnection();
+				ptmt = connection.prepareStatement(queryString);
+				ptmt.setString(1, sessionId);
+				ptmt.setString(2, ipAddress);
+				resultSet = ptmt.executeUpdate();
+				connection.close();
+				
+				 * while(resultSet.next()) { int count = resultSet.getInt(1); }
+				 
+			} catch (SQLException e) {
+			
+				e.printStackTrace();
+			}
+			new Date(session.getCreationTime());
+			new Date(session.getLastAccessedTime());
+
+		}
+	}*/
 	
+/*	@GetMapping(value = "/ipaddr")
+	public String IpAddr()
+	{
+		String Ip = null;
+		InetAddress thisIp = null;
+		try {
+			thisIp = InetAddress.getLocalHost();
+			Ip = thisIp.getHostName();
+			}
+			catch(Exception e) {
+			e.printStackTrace();
+			}
+			
+	return Ip;
+	}*/
 
 	@GetMapping(value = "/trendingAll", produces = "application/json")
 	@Transactional

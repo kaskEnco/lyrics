@@ -27,8 +27,9 @@ public class SendingMailDAO {
 		sendFromGMail(from, pass, to, subject, body);
 		return "success";
 	}
+
 	private boolean sendFromGMail(String from, String pass, String[] to, String subject, String body) {
-		// TODO Auto-generated method stub
+
 		Properties props = System.getProperties();
 		String host = "smtp.gmail.com";
 		props.put("mail.smtp.starttls.enable", "true");
@@ -65,7 +66,9 @@ public class SendingMailDAO {
 		} catch (MessagingException me) {
 			me.printStackTrace();
 		}
-		//if(statuscode == 200)
+
+		// if(statuscode == 200)
 		return false;
 
-}}
+	}
+}

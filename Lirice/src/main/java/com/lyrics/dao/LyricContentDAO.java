@@ -283,7 +283,7 @@ public class LyricContentDAO extends BaseDAO {
 
 	public List<Integer> getMovieIdsByWriter(String writerName) {
 		
-		int movieId;
+		//int movieId;
 		List<Integer> movies = new ArrayList<Integer>();
 		List<L_lyrics> lyrics = findAllLyrics();
 
