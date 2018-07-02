@@ -44,6 +44,7 @@ public class BaseDAO {
 
 	Connection connection = null;
 	MemcachedClient cache = null;
+	DB mongoClientDB = null;
 
 	public Connection getConnection() throws SQLException {
 		if (connection == null) {
@@ -64,6 +65,13 @@ public class BaseDAO {
 			e1.printStackTrace();
 		}
 		return cache;
+	}
+
+	public DB getMongoConnection() {
+		if (mongoClientDB == null) {
+			mongoClientDB = MongoDBConnection.getInstance().getConnection();
+		}
+		return mongoClientDB;
 	}
 
 	public BaseDAO() {
@@ -174,7 +182,6 @@ public class BaseDAO {
 		if (languages != null)
 			return languages;
 
-		
 		PreparedStatement ptmt = null;
 		ResultSet resultSet = null;
 		String queryString = "SELECT * FROM l_language ";
@@ -293,10 +300,11 @@ public class BaseDAO {
 
 	public List<L_lyrics> findAllTeluguLyrics() {
 
-		/*HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
-		        .getRequest();
-		request.getHeader("X-FORWARDED-FOR");
-		String ip = request.getRemoteAddr();*/
+		/*
+		 * HttpServletRequest request = ((ServletRequestAttributes)
+		 * RequestContextHolder.currentRequestAttributes()) .getRequest();
+		 * request.getHeader("X-FORWARDED-FOR"); String ip = request.getRemoteAddr();
+		 */
 		List<L_lyrics> teluguLyrics = null;
 		L_lyrics content;
 
@@ -309,60 +317,106 @@ public class BaseDAO {
 			return teluguLyrics;
 
 		teluguLyrics = new ArrayList<L_lyrics>();
-		MongoClient mongoClient = new MongoClient("localhost", 27017);
-		DB db = mongoClient.getDB("lyrics");
+		// MongoClient mongoClient = new MongoClient("localhost", 27017);
+		// MongoClient mongoClient = getMongoConnection();
+		DB db = getMongoConnection();
+		// DB db = mongoClient.getDB("lyrics");
 		DBCollection collection = db.getCollection("teluguLyrics");
 		DBCursor cursor = collection.find();
 
 		int n = collection.find().count();
 		Object value = null;
-			for(int i = 0; i < n; i++) {
-				value = cursor.next();
-				JSONObject obj = new JSONObject((Map) value);
-				content = new L_lyrics();
-				content.set_id((int) obj.get("_id"));
-				content.setLyricContent((String) obj.get("lyricContent"));
-				content.setUrl((String) obj.get("url"));
-				
-				teluguLyrics.add(content);
-				
-				
+		for (int i = 0; i < n; i++) {
+			value = cursor.next();
+			JSONObject obj = new JSONObject((Map) value);
+			content = new L_lyrics();
+			content.set_id((int) obj.get("_id"));
+			content.setLyricContent((String) obj.get("lyricContent"));
+			content.setUrl((String) obj.get("url"));
+
+			teluguLyrics.add(content);
+
 		}
 		cache.add(Constants.TELUGU_LYRIC_CONTENT, 0, teluguLyrics);
 
 		return teluguLyrics;
 	}
 
-	public void Count(int lyricId) {
+	public List<L_lyrics> findAllTimeHits() {
+		List<L_lyrics> allTimeHits = null;
+		L_lyrics content;
+
+		if (Constants.USE_MEMCACHED) {
+			cache = getMemcacheConnection();
+			allTimeHits = (List<L_lyrics>) cache.get(Constants.ALL_TIME_HITS);
+		}
+
+		if (allTimeHits != null)
+			return allTimeHits;
+
+		allTimeHits = new ArrayList<L_lyrics>();
+
+		// to select songs randomly use below query
+		// (select * from l_lyrics where all_time_hits = false order by rand() limit
+		// 5)order by updation_time desc;
+
+		LyricMovieDAO movieDAO = new LyricMovieDAO();
+		String queryString = "SELECT * FROM l_lyrics where all_time_hits = 1 order by updation_time desc";
 		PreparedStatement ptmt = null;
-		int resultSet ;
-		String queryString = "update l_lyrics set lyric_views = lyric_views+1 where id = ? ";
+		ResultSet resultSet = null;
 		try {
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);
-			ptmt.setInt(1, lyricId);
-			resultSet = ptmt.executeUpdate();
-			connection.close();
-			/*while(resultSet.next()) {
-				int count = resultSet.getInt(1);
-			}*/
-	}catch (SQLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	/*	try {
-			connection = getConnection();
-		
-		PreparedStatement stmt=connection.prepareStatement("update l_lyrics set count = count+1 where id=?");  
-		stmt.setInt(1,lyricId);//1 specifies the first parameter in the query i.e. name  
-		  
-		  
-		int i=stmt.executeUpdate();  
-		System.out.println(i+" records updated");
+			resultSet = ptmt.executeQuery();
+			while (resultSet.next()) {
+				content = new L_lyrics();
+				content.setLyricId(resultSet.getInt("id"));
+				content.setLyricTitle(resultSet.getString("lyric_title"));
+				content.setLyricContent(resultSet.getString("lyric_content"));
+				content.setMovie(movieDAO.findById(resultSet.getInt("movie_id")));
+				content.setWriterName(resultSet.getString("writer_name"));
+				content.setLyricViews(resultSet.getInt("lyric_views"));
+				content.setCreationDate(resultSet.getTimestamp("creation_time"));
+				content.setUpdationDate(resultSet.getTimestamp("updation_time"));
+				content.setUrl(resultSet.getString("url"));
+				allTimeHits.add(content);
+			}
+			cache.add(Constants.LYRIC_CONTENT, 0, allTimeHits);
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		} finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
+		}
+
+		return allTimeHits;
+
+	}
+
+	public void addDeviceIdForAndroid(String deviceId) {
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
+		String queryCheck = "select * from l_session where device_name = ?";
+		try {
+			connection = getConnection();
+			ptmt = connection.prepareStatement(queryCheck);
+			ptmt.setString(1, deviceId);
+			resultSet = ptmt.executeQuery();
+			if (resultSet.getFetchSize() == 0) {
+				String query = " insert into lyrics.l_session values (null,?) ";
+				connection = getConnection();
+				ptmt = connection.prepareStatement(query);
+				ptmt.setString(1, deviceId);
+				ptmt.executeQuery();
+			}
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+
+		}
 	}
 
 }

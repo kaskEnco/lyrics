@@ -14,5 +14,5 @@ public class Constants {
 	public final static String LYRIC_CONTENT = "lyricContent" ;
 
 	public static final String TELUGU_LYRIC_CONTENT = "teluguLyrics";
-
+	public static final String ALL_TIME_HITS = "alltimehits";
 }

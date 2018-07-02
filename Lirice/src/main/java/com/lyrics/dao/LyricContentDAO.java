@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +13,10 @@ import java.util.TreeSet;
 import org.json.simple.JSONObject;
 
 import com.lyrics.Constants;
+import com.lyrics.model.L_language;
 import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_movie;
+import com.lyrics.model.L_teluguLyrics;
 import com.lyrics.model.LyircsByMovie;
 import com.lyrics.model.LyricContent;
 import com.lyrics.model.TrendingMovies;
@@ -48,7 +51,7 @@ public class LyricContentDAO extends BaseDAO {
 
 			}
 		} catch (SQLException e) {
-	
+
 			e.printStackTrace();
 		} finally {
 			closeResultset(resultSet);
@@ -75,28 +78,11 @@ public class LyricContentDAO extends BaseDAO {
 					lyric.setWriterName(list.getWriterName());
 					allLyrics.add(lyric);
 				}
-
 			}
 		}
 
 		return allLyrics;
-		/*
-		 * LyircsByMovie lyric; List<LyircsByMovie> allLyrics = new
-		 * ArrayList<LyircsByMovie>(); String queryString =
-		 * "Select * from l_lyrics where movie_id = ?"; PreparedStatement ptmt = null;
-		 * ResultSet resultSet = null; try { connection = getConnection(); ptmt =
-		 * connection.prepareStatement(queryString); ptmt.setInt(1, movieId); resultSet
-		 * = ptmt.executeQuery(); while (resultSet.next()) { lyric = new
-		 * LyircsByMovie(); lyric.setLyricId(resultSet.getInt("id"));
-		 * lyric.setLyricTitle(resultSet.getString("lyric_title"));
-		 * lyric.setMovieId(resultSet.getInt("movie_id"));
-		 * lyric.setWriterName(resultSet.getString("writer_name"));
-		 * allLyrics.add(lyric); } } catch (SQLException e) { 
-		 * catch block e.printStackTrace(); } finally { closeResultset(resultSet);
-		 * closePtmt(ptmt); closeConnection(); }
-		 * 
-		 * return allLyrics;
-		 */
+		
 	}
 
 	public List<TrendingMovies> getTrendingLyrics() {
@@ -117,28 +103,10 @@ public class LyricContentDAO extends BaseDAO {
 		}
 		return lyrics;
 
-		/*
-		 * LyricMovieDAO movieDAO = new LyricMovieDAO(); PreparedStatement ptmt = null;
-		 * ResultSet resultSet = null; String queryString =
-		 * "select * from l_lyrics order by lyric_views DESC limit 15 "; try {
-		 * connection = getConnection(); ptmt =
-		 * connection.prepareStatement(queryString); resultSet = ptmt.executeQuery();
-		 * while (resultSet.next()) { lyric = new TrendingMovies();
-		 * lyric.setLyric_name(resultSet.getString("lyric_title")); L_movie movie =
-		 * movieDAO.findById(resultSet.getInt("movie_id"));
-		 * lyric.setMovieId(movie.getMovieId());
-		 * lyric.setMovieName(movie.getMovieName());
-		 * lyric.setWriterName(resultSet.getString("writer_name"));
-		 * lyric.setLyricViews(resultSet.getInt("lyric_views"));
-		 * trendingLyrics.add(lyric); } } catch (SQLException e) { e.printStackTrace(); } finally {
-		 * closeResultset(resultSet); closePtmt(ptmt); closeConnection(); }
-		 * 
-		 * return trendingLyrics;
-		 */
+	
 	}
 
 	public Set<String> getWriter() {
-		
 
 		TreeSet<String> writerSet = new TreeSet<String>();
 		PreparedStatement ptmt = null;
@@ -152,7 +120,7 @@ public class LyricContentDAO extends BaseDAO {
 				writerSet.add(resultSet.getString("writer_name"));
 			}
 		} catch (SQLException e) {
-		
+
 			e.printStackTrace();
 		} finally {
 			closeResultset(resultSet);
@@ -162,13 +130,91 @@ public class LyricContentDAO extends BaseDAO {
 		return writerSet;
 	}
 
-	public List<LyricContent> getLyrics(int lyricId) {
-		
+	public List<LyricContent> getLyrics(int lyricId, String device) {
+
+		/*
+		 * PreparedStatement ptmt = null; ResultSet resultSet = null; String queryString
+		 * = "SELECT id FROM l_session where device_name = ? "; int deviceId = 0; try {
+		 * 
+		 * connection = getConnection(); ptmt =
+		 * connection.prepareStatement(queryString); ptmt.setString(1, device);
+		 * resultSet = ptmt.executeQuery(); while(resultSet.next()) { deviceId =
+		 * resultSet.getInt("id"); }
+		 * 
+		 * } catch (SQLException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); } String query =
+		 * "select * from l_ids where device_id = ? and lyric_id = ?"; try {
+		 * 
+		 * connection = getConnection(); ptmt = connection.prepareStatement(query);
+		 * ptmt.setInt(1, deviceId); ptmt.setInt(2, lyricId); resultSet =
+		 * ptmt.executeQuery();
+		 * 
+		 * 
+		 * if(resultSet.next() == false) { String queryAdd =
+		 * "insert into l_ids values (null, ?, ?)"; connection = getConnection(); ptmt =
+		 * connection.prepareStatement(queryAdd); ptmt.setInt(1, lyricId);
+		 * ptmt.setInt(2, deviceId); ptmt.execute();
+		 * 
+		 * String queryCount =
+		 * "update lyrics.l_lyrics set lyric_views = lyric_views+1 where id = ?"; ptmt =
+		 * connection.prepareStatement(queryCount); ptmt.setInt(1, lyricId);
+		 * ptmt.executeUpdate(); }
+		 * 
+		 * } catch (SQLException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); }
+		 */
+
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
+		String queryString = "SELECT ids FROM l_session where device_name = ? ";
+		String ids = null;
+		boolean idExist = false;
+		List<String> idsList = null;
+		ArrayList<String> updatableList = new ArrayList<String>();
+		String[] stringArray = null;
+		try {
+
+			connection = getConnection();
+			ptmt = connection.prepareStatement(queryString);
+			ptmt.setString(1, device);
+			resultSet = ptmt.executeQuery();
+			while (resultSet.next()) {
+				ids = resultSet.getString("ids");
+			}
+			
+			if (ids != null) {
+				String[] arrayOfIds = ids.split("\\s*,\\s*");
+				idsList = Arrays.asList(arrayOfIds);
+				idExist = idsList.stream().anyMatch(id -> id.equals(lyricId));
+				updatableList.addAll(idsList);
+			}
+
+			if (!idExist) {
+				updatableList.add(Integer.toString(lyricId));
+				stringArray = updatableList.toArray(new String[updatableList.size()]);
+				String str = String.join(",", stringArray);
+				String query = "update l_session set ids = ? where device_name = ? ";
+				connection = getConnection();
+				ptmt = connection.prepareStatement(query);
+				ptmt.setString(1, str);
+				ptmt.setString(2, device);
+				ptmt.executeUpdate();
+
+				String queryCount = "update lyrics.l_lyrics set lyric_views = lyric_views+1 where id = ?";
+				ptmt = connection.prepareStatement(queryCount);
+				ptmt.setInt(1, lyricId);
+				ptmt.executeUpdate();
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		LyricContent content;
 		List<LyricContent> lyrics = null;
 		List<L_lyrics> allLyrics = findAllLyrics();
 
 		if (allLyrics != null) {
+
 			lyrics = new ArrayList<LyricContent>();
 			for (L_lyrics list : allLyrics) {
 				if (lyricId == list.getLyricId()) {
@@ -181,24 +227,11 @@ public class LyricContentDAO extends BaseDAO {
 			}
 		}
 		return lyrics;
-		/*
-		 * PreparedStatement ptmt = null; ResultSet resultSet = null; String queryString
-		 * = "Select lyric_content from l_lyrics where id = ?";
-		 * 
-		 * try { connection = getConnection(); ptmt =
-		 * connection.prepareStatement(queryString); ptmt.setInt(1, lyricId); resultSet
-		 * = ptmt.executeQuery(); while (resultSet.next()) { content = new
-		 * LyricContent();
-		 * content.setLyricContent(resultSet.getString("lyric_content"));
-		 * lyrics.add(content); } } catch (SQLException e) { e.printStackTrace(); }
-		 * 
-		 * return lyrics;
-		 */
 	}
 
 	public List<TrendingMovies> getAllTrendingMovies() {
 		List<TrendingMovies> trendingLyrics = null;
-	//	List<L_movie> trendingLyrics1 = findAllMovies();
+		
 		if (Constants.USE_MEMCACHED) {
 			cache = getMemcacheConnection();
 			trendingLyrics = (List<TrendingMovies>) cache.get(Constants.LATEST_TRENDING_KEY);
@@ -232,7 +265,7 @@ public class LyricContentDAO extends BaseDAO {
 			}
 			cache.add(Constants.LATEST_TRENDING_KEY, 0, trendingLyrics);
 		} catch (SQLException e) {
-		
+
 			e.printStackTrace();
 		} finally {
 			closeResultset(resultSet);
@@ -261,29 +294,12 @@ public class LyricContentDAO extends BaseDAO {
 			}
 		}
 		return allLyrics;
-		/*
-		 * String queryString =
-		 * "Select id,lyric_title from l_lyrics where movie_id = ? and writer_name = ?";
-		 * PreparedStatement ptmt = null; ResultSet resultSet = null; try { connection =
-		 * getConnection(); ptmt = connection.prepareStatement(queryString);
-		 * ptmt.setInt(1, movieId); ptmt.setString(2, writerName); resultSet =
-		 * ptmt.executeQuery(); while (resultSet.next()) { lyric = new LyircsByMovie();
-		 * lyric.setLyricId(resultSet.getInt("id"));
-		 * lyric.setLyricTitle(resultSet.getString("lyric_title"));
-		 * lyric.setMovieId(movieId); lyric.setWriterName(writerName);
-		 * allLyrics.add(lyric);
-		 * 
-		 * } } catch (SQLException e) { 
-		 * e.printStackTrace(); } finally { closeResultset(resultSet); closePtmt(ptmt);
-		 * closeConnection(); }
-		 * 
-		 * return allLyrics;
-		 */
+	
 	}
 
 	public List<Integer> getMovieIdsByWriter(String writerName) {
-		
-		//int movieId;
+
+		// int movieId;
 		List<Integer> movies = new ArrayList<Integer>();
 		List<L_lyrics> lyrics = findAllLyrics();
 
@@ -295,58 +311,30 @@ public class LyricContentDAO extends BaseDAO {
 			}
 		}
 		return movies;
-		/*
-		 * PreparedStatement ptmt = null; ResultSet resultSet = null; String queryString
-		 * = "Select movie_id from l_lyrics where writer_name = ?";
-		 * 
-		 * try { connection = getConnection(); ptmt =
-		 * connection.prepareStatement(queryString); ptmt.setString(1, writerName);
-		 * resultSet = ptmt.executeQuery(); while (resultSet.next()) { movieId =
-		 * resultSet.getInt("movie_id"); movies.add(movieId); } } catch (SQLException e)
-		 * {  e.printStackTrace(); }
-		 * 
-		 * return movies;
-		 */
+	
 
 	}
 
-	public List<LyricContent> getTeluguLyrics(int idTelugu) {
-		 LyricContent content;
-		 List<LyricContent> alllyrics = new ArrayList<LyricContent>();
-		//
-		// MongoClient mongoClient = new MongoClient("localhost", 27017);
-		// DB db = mongoClient.getDB("lyrics");
-		// DBCollection collection = db.getCollection("teluguLyrics");
-		// BasicDBObject searchQuery = new BasicDBObject();
-		// searchQuery.put("_id", idTelugu);
-		// DBCursor cursorEvents = collection.find(searchQuery);
-		//
-		// Object value = null;
-		// if (cursorEvents.hasNext()) {
-		// value = cursorEvents.next();
-		// JSONObject obj = new JSONObject((Map) value);
-		// content = new LyricContent();
-		// content.setLyricContent( (String) obj.get("lyricContent"));
-		// content.setUrl((String) obj.get("url"));
-		// lyrics.add(content);
-		// }
+	public List<L_teluguLyrics> getTeluguLyrics(int idTelugu) {
+		L_teluguLyrics content;
+		List<L_teluguLyrics> alllyrics = new ArrayList<L_teluguLyrics>();
 
 		List<L_lyrics> lyrics = findAllTeluguLyrics();
 		if (lyrics != null) {
-			for(L_lyrics lyric : lyrics) {
-				if( lyric.get_id() == idTelugu) {
-					content = new LyricContent();
+			for (L_lyrics lyric : lyrics) {
+				if (lyric.get_id() == idTelugu) {
+					content = new L_teluguLyrics();
 					content.set_id(lyric.get_id());
 					content.setLyricContent(lyric.getLyricContent());
 					content.setUrl(lyric.getUrl());
 					alllyrics.add(content);
 					break;
 				}
-			
+
 			}
 		}
 
-			return alllyrics;
+		return alllyrics;
 	}
 
 }

@@ -1,12 +1,37 @@
 package com.lyrics.dao;
 
+import java.io.ByteArrayInputStream;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.lyrics.AESEncryption;
 import com.lyrics.Constants;
 import com.lyrics.model.L_movie;
 import com.lyrics.model.L_year;
@@ -15,6 +40,8 @@ import com.lyrics.model.MoviesLatest;
 
 public class LyricMovieDAO extends BaseDAO {
 
+	AESEncryption encry = new AESEncryption();
+
 	public L_movie findById(int id) {
 		L_movie movie = new L_movie();
 		List<L_movie> movies = findAllMovies();
@@ -22,7 +49,7 @@ public class LyricMovieDAO extends BaseDAO {
 		if (movies != null) {
 			for (L_movie list : movies) {
 				if (list.getMovieId() == id) {
-					
+
 					return list;
 
 				}
@@ -30,34 +57,14 @@ public class LyricMovieDAO extends BaseDAO {
 		}
 
 		return movie;
-		/*
-		 * movie = new L_movie(); LyricLanguageDAO langDAO = new
-		 * LyricLanguageDAO(); LyricYearDAO yearDAO = new LyricYearDAO();
-		 * PreparedStatement ptmt = null; ResultSet resultSet = null; String
-		 * queryString = "SELECT * FROM l_movie WHERE (id = ? )"; try {
-		 * connection = getConnection(); ptmt =
-		 * connection.prepareStatement(queryString); ptmt.setInt(1, id);
-		 * resultSet = ptmt.executeQuery(); while (resultSet.next()) {
-		 * movie.setMovieId(resultSet.getInt("id"));
-		 * movie.setLanguage(langDAO.findById(resultSet.getInt("lang_id")));
-		 * movie.setYear(yearDAO.findById(resultSet.getInt("lang_year")));
-		 * movie.setMovieName(resultSet.getString("movie_name"));
-		 * movie.setMovieReleaseDate(resultSet.getTimestamp("movie_release_date"
-		 * )); movie.setCreationDate(resultSet.getTimestamp("creation_time"));
-		 * movie.setUpdationDate(resultSet.getTimestamp("updation_time"));
-		 * movies.add(movie); } // cache.add(movieList,1200, movies); } catch
-		 * (SQLException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } finally { closeResultset(resultSet);
-		 * closePtmt(ptmt); closeConnection(); }
-		 * 
-		 * 
-		 * return movie;
-		 */
+		
 	}
 
-	public List<MoviesLatest> findLatest() {
+	public String findLatest() {
 		List<MoviesLatest> movies = null;
-
+		String movie = null;
+		String moviesEnc = null;
+		List<MoviesLatest> decMov;
 		List<MoviesLatest> moviesLatest = findAllLatest();
 		if (moviesLatest != null || moviesLatest.size() > 0) {
 			int i = 0;
@@ -71,28 +78,17 @@ public class LyricMovieDAO extends BaseDAO {
 				break;
 			}
 		}
-
-		return movies;
-		// Note : No Need To write Query
-		/*
-		 * PreparedStatement ptmt = null; ResultSet resultSet = null; String
-		 * queryString =
-		 * "SELECT * FROM lyrics.l_movie ORDER BY movie_release_date DESC LIMIT 15"
-		 * ; try { connection = getConnection(); ptmt =
-		 * connection.prepareStatement(queryString); resultSet =
-		 * ptmt.executeQuery(); while (resultSet.next()) { latest = new
-		 * L_movie(); int movieId = resultSet.getInt("id");
-		 * latest.setMovieId(movieId);
-		 * latest.setMovieName(resultSet.getString("movie_name"));
-		 * latest.setMovieReleaseDate(resultSet.getTimestamp(
-		 * "movie_release_date")); moviesLatest.add(latest); }
-		 * 
-		 * } catch (SQLException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } finally { closeResultset(resultSet);
-		 * closePtmt(ptmt); closeConnection(); }
-		 */
-
+	System.out.println(movies);
+	Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+	String json = gson.toJson(movies);
+	
+		moviesEnc = encry.encrypt(json, "lyricsbykaskenco");
+		movie = encry.decrypt(moviesEnc, "lyricsbykaskenco");
+		return moviesEnc;
+	
+		
 	}
+	
 
 	public List<L_movie> findByYear(L_year year) {
 		List<L_movie> moviesByYear = new ArrayList<L_movie>();
@@ -107,32 +103,16 @@ public class LyricMovieDAO extends BaseDAO {
 			}
 		}
 		return moviesByYear;
-
-		/*
-		 * PreparedStatement ptmt = null; ResultSet resultSet = null; String
-		 * queryString = "SELECT * FROM lyrics.l_movie where movie_year_id = ?";
-		 * try { connection = getConnection(); ptmt =
-		 * connection.prepareStatement(queryString); ptmt.setInt(1,
-		 * year.getLyircYear()); resultSet = ptmt.executeQuery(); while
-		 * (resultSet.next()) { movieYear = new L_movie(); // int movieId =
-		 * resultSet.getInt("id"); movieYear.setMovieId(resultSet.getInt("id"));
-		 * movieYear.setMovieName(resultSet.getString("movie_name"));
-		 * movieYear.setYear(year); movieYears.add(movieYear); } } catch
-		 * (SQLException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } finally { closeResultset(resultSet);
-		 * closePtmt(ptmt); closeConnection(); }
-		 * 
-		 * return movieYears;
-		 */
+		
 	}
 
 	private int getYear(Timestamp timestamp) {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	public List<MoviesByWriter> getMoviesByWriter(String writerName) {
-		// TODO Auto-generated method stub
+		
 		MoviesByWriter movie;
 		List<Integer> movieIds = null;
 		List<MoviesByWriter> movies = new ArrayList<MoviesByWriter>();
@@ -154,7 +134,7 @@ public class LyricMovieDAO extends BaseDAO {
 						movie.setMovieName(resultSet.getString("movie_name"));
 						movie.setWriterName(writerName);
 						movie.setMovieReleaseDate(resultSet.getTimestamp("movie_release_date"));
-						//movie.setMovieId(movieId);
+						// movie.setMovieId(movieId);
 						movies.add(movie);
 					}
 				} catch (SQLException e) {
@@ -201,7 +181,7 @@ public class LyricMovieDAO extends BaseDAO {
 					latest.setMovieReleaseDate(resultSet.getTimestamp("movie_release_date"));
 					moviesLatest.add(latest);
 				}
-				cache.add(Constants.LATEST_MOVIES_KEY,0, moviesLatest);
+				cache.add(Constants.LATEST_MOVIES_KEY, 0, moviesLatest);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

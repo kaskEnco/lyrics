@@ -36,7 +36,7 @@ public class SolrSearchDAO {
 		// query.addFilterQuery("writer_name:*an*","lyric_title:*dhoo*");
 		query.setFields("id", "writer_name", "movie_name", "lyric_title","movie_id", "movie_release_date");
 		query.setStart(0);
-		 query.setRows(100); //to specify max number of rows to be retrieved
+		 query.setRows(500); //to specify max number of rows to be retrieved
 		// query.setTermsMaxCount(25);
 //		query.set("defType", "json");
 		//query.set("wt","json");
@@ -52,18 +52,8 @@ public class SolrSearchDAO {
 			e.printStackTrace();
 		}
 		SolrDocumentList documents = response.getResults();
-		// assertEquals(NUM_INDEXED_DOCUMENTS, documents.getNumFound());
-//		for (SolrDocument document : documents) {
-//			search = new SolrSearch();
-//			search.setMovie_id((int) document.getFieldValue("movie_id"));
-//			search.setWriter_name((String) document.getFieldValue("writer_name"));
-//			search.setLyric_title((String) document.getFieldValue("lyric_title"));
-//			search.setMovie_name((String) document.getFieldValue("movie_name"));
-//			searchList.add(search);
-//			// assertTrue(document.getFieldNames().contains("name"));
-//		}
+
 		return documents;
 }}
 
-//"writer_name:*ram*" + " " + "OR" + " " + "lyric_title:*ram*"
-//+ " " + "OR" + " " + "movie_name:*" + Searchvalue + "*"
+

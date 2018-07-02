@@ -24,8 +24,12 @@ public class SendingMailDAO {
 		String subject = mail.getMailId();
 		String body = mail.getMailDescription();
 
-		sendFromGMail(from, pass, to, subject, body);
-		return "success";
+		boolean mailResult = sendFromGMail(from, pass, to, subject, body);
+		if (mailResult) {
+			return "success";
+		} else {
+			return "failed";
+		}
 	}
 
 	private boolean sendFromGMail(String from, String pass, String[] to, String subject, String body) {
@@ -63,12 +67,11 @@ public class SendingMailDAO {
 			transport.close();
 		} catch (AddressException ae) {
 			ae.printStackTrace();
+			return false;
 		} catch (MessagingException me) {
 			me.printStackTrace();
+			return false;
 		}
-
-		// if(statuscode == 200)
-		return false;
-
+		return true;
 	}
 }

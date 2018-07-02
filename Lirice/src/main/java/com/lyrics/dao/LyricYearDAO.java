@@ -13,6 +13,7 @@ public class LyricYearDAO extends BaseDAO {
 			for (L_year list : years) {
 				if (list.getYearId() == Id) {
 					yearObj = list;
+					break;
 				}
 			}
 
@@ -27,6 +28,7 @@ public class LyricYearDAO extends BaseDAO {
 			 for (L_year list : years) {
 			 if (list.getLyircYear() == year) {
 			   yearsObj = list;
+			   break;
 			 }
 		 }
 		 
