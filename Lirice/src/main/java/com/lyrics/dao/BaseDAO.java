@@ -1,6 +1,5 @@
 package com.lyrics.dao;
 
-import java.net.SocketException;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -10,34 +9,19 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.bson.Document;
 import org.json.simple.JSONObject;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
 import com.lyrics.Constants;
+import com.lyrics.model.L_allTimeHits;
 import com.lyrics.model.L_language;
 import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_movie;
 import com.lyrics.model.L_year;
-import com.lyrics.model.LyricContent;
-import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import net.spy.memcached.MemcachedClient;
 
 public class BaseDAO {
@@ -202,6 +186,10 @@ public class BaseDAO {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
 		}
 
 		return languages;
@@ -300,11 +288,6 @@ public class BaseDAO {
 
 	public List<L_lyrics> findAllTeluguLyrics() {
 
-		/*
-		 * HttpServletRequest request = ((ServletRequestAttributes)
-		 * RequestContextHolder.currentRequestAttributes()) .getRequest();
-		 * request.getHeader("X-FORWARDED-FOR"); String ip = request.getRemoteAddr();
-		 */
 		List<L_lyrics> teluguLyrics = null;
 		L_lyrics content;
 
@@ -342,25 +325,27 @@ public class BaseDAO {
 		return teluguLyrics;
 	}
 
-	public List<L_lyrics> findAllTimeHits() {
-		List<L_lyrics> allTimeHits = null;
-		L_lyrics content;
+	public List<L_allTimeHits> findAllTimeHits() {
+		List<L_allTimeHits> allTimeHits = null;
+		L_allTimeHits content;
 
 		if (Constants.USE_MEMCACHED) {
 			cache = getMemcacheConnection();
-			allTimeHits = (List<L_lyrics>) cache.get(Constants.ALL_TIME_HITS);
+			allTimeHits = (List<L_allTimeHits>) cache.get(Constants.ALL_TIME_HITS);
 		}
 
 		if (allTimeHits != null)
 			return allTimeHits;
 
-		allTimeHits = new ArrayList<L_lyrics>();
+		allTimeHits = new ArrayList<L_allTimeHits>();
 
 		// to select songs randomly use below query
 		// (select * from l_lyrics where all_time_hits = false order by rand() limit
 		// 5)order by updation_time desc;
 
 		LyricMovieDAO movieDAO = new LyricMovieDAO();
+		LyricLanguageDAO langDAO = new LyricLanguageDAO();
+		LyricYearDAO yearDAO = new LyricYearDAO();
 		String queryString = "SELECT * FROM l_lyrics where all_time_hits = 1 order by updation_time desc";
 		PreparedStatement ptmt = null;
 		ResultSet resultSet = null;
@@ -369,15 +354,16 @@ public class BaseDAO {
 			ptmt = connection.prepareStatement(queryString);
 			resultSet = ptmt.executeQuery();
 			while (resultSet.next()) {
-				content = new L_lyrics();
+				content = new L_allTimeHits();
 				content.setLyricId(resultSet.getInt("id"));
 				content.setLyricTitle(resultSet.getString("lyric_title"));
-				content.setLyricContent(resultSet.getString("lyric_content"));
-				content.setMovie(movieDAO.findById(resultSet.getInt("movie_id")));
 				content.setWriterName(resultSet.getString("writer_name"));
-				content.setLyricViews(resultSet.getInt("lyric_views"));
-				content.setCreationDate(resultSet.getTimestamp("creation_time"));
-				content.setUpdationDate(resultSet.getTimestamp("updation_time"));
+				L_movie movie = movieDAO.findById(resultSet.getInt("movie_id"));
+				content.setMovieId(movie.getMovieId());
+				content.setMovieName(movie.getMovieName());
+				content.setReleaseDate(movie.getMovieReleaseDate());
+				content.setMovie_id(resultSet.getString("movie_id"));
+				content.setWriterName(resultSet.getString("writer_name"));
 				content.setUrl(resultSet.getString("url"));
 				allTimeHits.add(content);
 			}
@@ -406,11 +392,11 @@ public class BaseDAO {
 			ptmt.setString(1, deviceId);
 			resultSet = ptmt.executeQuery();
 			if (resultSet.getFetchSize() == 0) {
-				String query = " insert into lyrics.l_session values (null,?) ";
+				String query = " insert into lyrics.l_session values (null,?,null) ";
 				connection = getConnection();
 				ptmt = connection.prepareStatement(query);
 				ptmt.setString(1, deviceId);
-				ptmt.executeQuery();
+				ptmt.executeUpdate();
 			}
 		} catch (SQLException e) {
 

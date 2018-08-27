@@ -18,8 +18,8 @@ public class MoviesController {
 
 	@GetMapping(value = "/latestMovies", produces = "application/json")
 	@Transactional
-	public String findLatestMovies() {
-		String latestMovies = new LyricMovieDAO().findLatest();
+	public List<MoviesLatest> findLatestMovies() {
+		List<MoviesLatest> latestMovies = new LyricMovieDAO().findLatest();
 		return latestMovies;
 	}
 

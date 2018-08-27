@@ -15,9 +15,9 @@ import com.lyrics.model.Mail;
 public class SendingMailDAO {
 
 	public String sendMial(Mail mail) {
-		String USER_NAME = "anvesh.kask"; // GMail user name (just the part before "@gmail.com")
-		String PASSWORD = "9553226074"; // GMail password
-		String RECIPIENT = "anvesh.kask@gmail.com";
+		String USER_NAME = "lyricsfeedback"; // GMail user name (just the part before "@gmail.com")
+		String PASSWORD = "Kask@2610"; // GMail password
+		String RECIPIENT = "lyricsfeedback@gmail.com";
 		String from = USER_NAME;
 		String pass = PASSWORD;
 		String[] to = { RECIPIENT }; // list of recipient email addresses

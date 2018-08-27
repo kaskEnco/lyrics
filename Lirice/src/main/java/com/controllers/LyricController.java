@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lyrics.dao.BaseDAO;
 import com.lyrics.dao.LyricContentDAO;
+import com.lyrics.model.Contents;
 import com.lyrics.model.Device;
+import com.lyrics.model.L_allTimeHits;
 import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_teluguLyrics;
 import com.lyrics.model.LyircsByMovie;
@@ -58,17 +60,32 @@ public class LyricController {
 		return moviesByWriter;
 	}
 	
-	@GetMapping(value = "/teluguLyrics/{idTelugu}", produces = "application/json")
+	@PostMapping(value = "/teluguLyrics/{idTelugu}", produces = "application/json")
 	@Transactional
-	public List<L_teluguLyrics> findTeluguLyrics(@PathVariable int idTelugu, HttpServletRequest request) {
-		List<L_teluguLyrics> lyrics = new LyricContentDAO().getTeluguLyrics(idTelugu);
+	public List<L_teluguLyrics> findTeluguLyrics(@PathVariable int idTelugu,@RequestBody Device device) {
+		String deviceId = device.getId();
+		List<L_teluguLyrics> lyrics = new LyricContentDAO().getTeluguLyrics(idTelugu, deviceId);
 		return lyrics;
 	}
 	
 	@GetMapping(value = "/allTimeHits", produces = "application/json")
 	@Transactional
-	public List<L_lyrics> getAllTimeHits() {
-		List<L_lyrics> lyrics = new BaseDAO().findAllTimeHits();
+	public List<L_allTimeHits> getAllTimeHits() {
+		List<L_allTimeHits> lyrics = new BaseDAO().findAllTimeHits();
 		return lyrics;
+	}
+	
+	@PostMapping(value = "/lyricsUpdate", produces = "application/json")
+	@Transactional
+	public void updateLyrics(@RequestBody Contents content) {
+	
+		new LyricContentDAO().updateLyrics(content);
+	}
+	
+	@PostMapping(value = "/teluguLyricsUpdate", produces = "application/json")
+	@Transactional
+	public void updateTeluguLyrics(@RequestBody Contents content) {
+	
+		new LyricContentDAO().updateTeluguLyrics(content);
 	}
 }

@@ -60,7 +60,7 @@ public class LyricMovieDAO extends BaseDAO {
 		
 	}
 
-	public String findLatest() {
+	public List<MoviesLatest> findLatest() {
 		List<MoviesLatest> movies = null;
 		String movie = null;
 		String moviesEnc = null;
@@ -78,13 +78,13 @@ public class LyricMovieDAO extends BaseDAO {
 				break;
 			}
 		}
-	System.out.println(movies);
+	
 	Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 	String json = gson.toJson(movies);
 	
 		moviesEnc = encry.encrypt(json, "lyricsbykaskenco");
 		movie = encry.decrypt(moviesEnc, "lyricsbykaskenco");
-		return moviesEnc;
+		return movies;
 	
 		
 	}
@@ -168,7 +168,7 @@ public class LyricMovieDAO extends BaseDAO {
 			moviesLatest = new ArrayList<MoviesLatest>();
 			PreparedStatement ptmt = null;
 			ResultSet resultSet = null;
-			String queryString = "SELECT * FROM lyrics.l_movie ORDER BY movie_release_date DESC";
+			String queryString = "SELECT * FROM lyrics.l_movie ORDER BY movie_release_date DESC limit 100";
 			try {
 				connection = getConnection();
 				ptmt = connection.prepareStatement(queryString);
