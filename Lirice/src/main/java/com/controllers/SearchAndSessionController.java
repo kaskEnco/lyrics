@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lyrics.FCMNotification;
 import com.lyrics.dao.BaseDAO;
 import com.lyrics.dao.SendingMailDAO;
 import com.lyrics.dao.SolrSearchDAO;
@@ -37,7 +38,23 @@ public class SearchAndSessionController {
 	public void getAndroidDeviceId(@RequestBody Device deviceId) {
 		{
 			String id = deviceId.getId();
-			new BaseDAO().addDeviceIdForAndroid(id);
+			String fcmToken = deviceId.getFcmToken();
+			new BaseDAO().addDeviceIdForAndroid(id, fcmToken);
 		}
 	}
+	/*@GetMapping(value = "/pushNotification/{userDefinedToken}")
+	public int PushNotification(@PathVariable String userDefinedToken)
+	{
+		int status = 0;
+		try {
+			status = FCMNotification.pushFCMNotification(userDefinedToken);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return status;
+    
+		
+		
+	}*/
 }

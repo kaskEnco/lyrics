@@ -33,10 +33,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.lyrics.AESEncryption;
 import com.lyrics.Constants;
+import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_movie;
 import com.lyrics.model.L_year;
 import com.lyrics.model.MoviesByWriter;
 import com.lyrics.model.MoviesLatest;
+
+import net.spy.memcached.MemcachedClient;
 
 public class LyricMovieDAO extends BaseDAO {
 
@@ -61,10 +64,20 @@ public class LyricMovieDAO extends BaseDAO {
 	}
 
 	public List<MoviesLatest> findLatest() {
+		MemcachedClient cache;
 		List<MoviesLatest> movies = null;
-		String movie = null;
+		//String movie = null; ---> For encryption
 		String moviesEnc = null;
-		List<MoviesLatest> decMov;
+		
+		
+		if (Constants.USE_MEMCACHED) {
+			cache = getMemcacheConnection();
+			movies = (List<MoviesLatest>) cache.get(Constants.LATEST_MOVIES);
+		}
+		
+		if (movies != null)
+			return movies;
+		
 		List<MoviesLatest> moviesLatest = findAllLatest();
 		if (moviesLatest != null || moviesLatest.size() > 0) {
 			int i = 0;
@@ -75,18 +88,21 @@ public class LyricMovieDAO extends BaseDAO {
 					i++;
 					continue;
 				}
+				//cache = getMemcacheConnection();
+				
 				break;
 			}
 		}
-	
-	Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+	//For encryption
+	/*Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 	String json = gson.toJson(movies);
 	
 		moviesEnc = encry.encrypt(json, "lyricsbykaskenco");
 		movie = encry.decrypt(moviesEnc, "lyricsbykaskenco");
-		return movies;
-	
 		
+	*/
+		cache.add(Constants.LATEST_MOVIES, 0, movies);
+		return movies;
 	}
 	
 
@@ -115,9 +131,18 @@ public class LyricMovieDAO extends BaseDAO {
 		
 		MoviesByWriter movie;
 		List<Integer> movieIds = null;
-		List<MoviesByWriter> movies = new ArrayList<MoviesByWriter>();
+		List<MoviesByWriter> movies = null;
+		if (Constants.USE_MEMCACHED) {
+			cache = getMemcacheConnection();
+			movies = (List<MoviesByWriter>) cache.get("writer"+writerName);
+		}
+
+		if(movies != null)
+			return movies;
+		
 		PreparedStatement ptmt = null;
 		ResultSet resultSet = null;
+		movies = new ArrayList<MoviesByWriter>();
 		movieIds = new LyricContentDAO().getMovieIdsByWriter(writerName);
 		if (movieIds != null && movieIds.size() > 0) {
 			for (int i = 0; i < movieIds.size(); i++) {
@@ -148,7 +173,7 @@ public class LyricMovieDAO extends BaseDAO {
 			}
 
 		}
-
+		cache.add("writer"+writerName, 0, movies);
 		return movies;
 	}
 

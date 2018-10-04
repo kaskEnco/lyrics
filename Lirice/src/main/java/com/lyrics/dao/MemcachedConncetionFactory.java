@@ -26,7 +26,7 @@ public class MemcachedConncetionFactory {
 			//cache = new MemcachedClient(new InetSocketAddress("127.0.0.1", 11211));
 			List<String> addresses = new ArrayList<String>();
 			addresses.add("127.0.0.1:11211");
-			//addresses.add("127.0.0.1:11212");
+			addresses.add("127.0.0.1:11212");
 			cache = new MemcachedClient(new ConnectionFactoryBuilder().setShouldOptimize(false).setTimeoutExceptionThreshold(100).setProtocol(ConnectionFactoryBuilder.Protocol.BINARY).setDaemon(true).setFailureMode(FailureMode.Redistribute).build(), AddrUtil.getAddresses(addresses));
 			 			
 			

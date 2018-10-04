@@ -1,5 +1,11 @@
 package com.lyrics.dao;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -12,13 +18,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.simple.JSONObject;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.lyrics.Constants;
 import com.lyrics.model.L_allTimeHits;
 import com.lyrics.model.L_language;
 import com.lyrics.model.L_lyrics;
 import com.lyrics.model.L_movie;
 import com.lyrics.model.L_year;
+import com.lyrics.model.NotificationData;
+import com.lyrics.model.NotificationRequestModel;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -186,7 +202,7 @@ public class BaseDAO {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}finally {
+		} finally {
 			closeResultset(resultSet);
 			closePtmt(ptmt);
 			closeConnection();
@@ -313,7 +329,7 @@ public class BaseDAO {
 			value = cursor.next();
 			JSONObject obj = new JSONObject((Map) value);
 			content = new L_lyrics();
-			content.set_id((int) obj.get("_id"));
+			// content.set_id((int) obj.get("_id"));
 			content.setLyricContent((String) obj.get("lyricContent"));
 			content.setUrl((String) obj.get("url"));
 
@@ -342,16 +358,28 @@ public class BaseDAO {
 		// to select songs randomly use below query
 		// (select * from l_lyrics where all_time_hits = false order by rand() limit
 		// 5)order by updation_time desc;
-
+		File file = new File("/tmp/count.txt"); // ("/tmp/count.txt") in aws
+		BufferedReader br;
+		String year = null;
+		try {
+			br = new BufferedReader(new FileReader(file));
+			year = br.readLine();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// int year = Integer.parseInt(yearInString);
 		LyricMovieDAO movieDAO = new LyricMovieDAO();
-		LyricLanguageDAO langDAO = new LyricLanguageDAO();
-		LyricYearDAO yearDAO = new LyricYearDAO();
-		String queryString = "SELECT * FROM l_lyrics where all_time_hits = 1 order by updation_time desc";
+		String queryString = "SELECT * FROM lyrics.l_lyrics where l_lyrics.all_time_hits=true and (select true from l_movie where l_lyrics.movie_id=id and movie_release_date < ?) order by rand() limit 100;";
 		PreparedStatement ptmt = null;
 		ResultSet resultSet = null;
 		try {
 			connection = getConnection();
 			ptmt = connection.prepareStatement(queryString);
+			ptmt.setString(1, year);
 			resultSet = ptmt.executeQuery();
 			while (resultSet.next()) {
 				content = new L_allTimeHits();
@@ -367,7 +395,7 @@ public class BaseDAO {
 				content.setUrl(resultSet.getString("url"));
 				allTimeHits.add(content);
 			}
-			cache.add(Constants.LYRIC_CONTENT, 0, allTimeHits);
+			cache.add(Constants.ALL_TIME_HITS, 0, allTimeHits);
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -382,7 +410,7 @@ public class BaseDAO {
 
 	}
 
-	public void addDeviceIdForAndroid(String deviceId) {
+	public void addDeviceIdForAndroid(String deviceId, String fcmToken) {
 		PreparedStatement ptmt = null;
 		ResultSet resultSet = null;
 		String queryCheck = "select * from l_session where device_name = ?";
@@ -391,18 +419,142 @@ public class BaseDAO {
 			ptmt = connection.prepareStatement(queryCheck);
 			ptmt.setString(1, deviceId);
 			resultSet = ptmt.executeQuery();
-			if (resultSet.getFetchSize() == 0) {
-				String query = " insert into lyrics.l_session values (null,?,null) ";
+			if (resultSet.next() == false) {
+				String query = " insert into lyrics.l_session values (null,?,null,?) ";
 				connection = getConnection();
 				ptmt = connection.prepareStatement(query);
 				ptmt.setString(1, deviceId);
+				ptmt.setString(2, fcmToken);
 				ptmt.executeUpdate();
+				ptmt.close();
+			} else {
+				String query = " update lyrics.l_session set fcmtoken =? where device_name = ? ";
+				connection = getConnection();
+				ptmt = connection.prepareStatement(query);
+				ptmt.setString(1, fcmToken);
+				ptmt.setString(2, deviceId);
+				ptmt.executeUpdate();
+				ptmt.close();
 			}
 		} catch (SQLException e) {
-
 			e.printStackTrace();
-
+		}finally {
+			try {
+				connection.close();
+				resultSet.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+	}
+
+	public List<L_lyrics> findAllLyricsByWriter(String writerName) {
+		List<L_lyrics> lyrics = null;
+		if (Constants.USE_MEMCACHED) {
+			cache = getMemcacheConnection();
+			lyrics = (List<L_lyrics>) cache.get("writerlyrics" + writerName);
+		}
+
+		if (lyrics != null)
+			return lyrics;
+
+		lyrics = new ArrayList<L_lyrics>();
+		LyricMovieDAO movieDAO = new LyricMovieDAO();
+		L_lyrics lyric = null;
+		String queryString = "SELECT * FROM l_lyrics where writer_name=?";
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
+		try {
+			connection = getConnection();
+			ptmt = connection.prepareStatement(queryString);
+			ptmt.setString(1, writerName);
+			resultSet = ptmt.executeQuery();
+			while (resultSet.next()) {
+				lyric = new L_lyrics();
+				lyric.setLyricId(resultSet.getInt("id"));
+				lyric.setLyricTitle(resultSet.getString("lyric_title"));
+				lyric.setLyricContent(resultSet.getString("lyric_content"));
+				lyric.setMovie(movieDAO.findById(resultSet.getInt("movie_id")));
+				lyric.setWriterName(resultSet.getString("writer_name"));
+				lyric.setLyricViews(resultSet.getInt("lyric_views"));
+				lyric.setCreationDate(resultSet.getTimestamp("creation_time"));
+				lyric.setUpdationDate(resultSet.getTimestamp("updation_time"));
+				lyric.setUrl(resultSet.getString("url"));
+				lyrics.add(lyric);
+			}
+			cache.add("writerlyrics" + writerName, 0, lyrics);
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			closeResultset(resultSet);
+			closePtmt(ptmt);
+			closeConnection();
+		}
+
+		return lyrics;
+	}
+	
+	public String notifications(StringBuilder lyricTitles,String lyricBody) {
+
+		PreparedStatement ptmt = null;
+		ResultSet resultSet = null;
+		String query = "SELECT fcmtoken FROM lyrics.l_session ";
+		try {
+			connection = getConnection();
+			ptmt = connection.prepareStatement(query);
+			//ptmt.setString(1, year);
+			resultSet = ptmt.executeQuery();
+			while (resultSet.next()) {
+				String fcmtoken = resultSet.getString("fcmtoken");
+				HttpClient httpClient = HttpClientBuilder.create().build();
+				HttpPost postRequest = new HttpPost("https://fcm.googleapis.com/fcm/send");
+
+				// we already created this model class.
+				// we will convert this model class to json object using google gson library.
+
+				NotificationRequestModel notificationRequestModel = new NotificationRequestModel();
+				NotificationData notificationData = new NotificationData();
+
+				notificationData.setBody(lyricTitles+"..");
+				notificationData.setTitle(lyricBody);
+				notificationData.setPriority("high");
+				notificationData.setSound("default");
+				notificationData.setShow_in_foreground("true");
+				notificationData.setShow_in_background("true");
+				notificationData.setFcmMessageType("notification");
+				notificationData.setClick_action("example.com.pushnotifications_TARGET_NOTIFICATION");
+				notificationData.setIcon("ic_launcher");
+				notificationRequestModel.setNotification(notificationData);
+				notificationRequestModel.setTo(fcmtoken);
+
+				Gson gson = new Gson();
+				Type type = new TypeToken<NotificationRequestModel>() {
+				}.getType();
+
+				String json = gson.toJson(notificationRequestModel, type);
+
+				StringEntity input = new StringEntity(json);
+				input.setContentType("application/json");
+
+				// server key of your firebase project goes here in header field.
+				// You can get it from firebase console.
+
+				postRequest.addHeader("Authorization",
+						"key=AAAA-IP9V4Y:APA91bHkPMutN_7VuiXQEELdzzOKdK5y-Lr9oCwygCwaOfW8pzOvvFXm0No3fLJNZUqZIiQ1d9Gj3ihYmOp-sfqnlDRM0dEgwLy8pPpnyv4UqUQ58W3PUEeSEOcUBGqcwAcAKKLP8QwT");
+				postRequest.setEntity(input);
+
+				System.out.println("request:" + json);
+				httpClient.execute(postRequest);
+			
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "success";
+	
 	}
 
 }
